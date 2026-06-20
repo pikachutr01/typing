@@ -5,7 +5,7 @@ import { SettingsPanel } from './components/SettingsPanel'
 import { TypingWorkspace } from './components/TypingWorkspace'
 import { typingTexts } from './data/texts'
 import type { DurationMinutes, TestStatus } from './types/typing'
-import { calculateGrossWpm, calculateTypingResult } from './utils/calculateMetrics'
+import { calculateTypingResult } from './utils/calculateMetrics'
 import { diffText } from './utils/diffText'
 import { getReachedExpectedText } from './utils/evaluateExamRules'
 import { getTestHistory, saveTestHistory } from './utils/history'
@@ -38,6 +38,7 @@ function App() {
   const [remainingSeconds, setRemainingSeconds] = useState(durationMinutes * 60)
   const [hasSavedResult, setHasSavedResult] = useState(false)
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const selectedText = useMemo(
@@ -219,15 +220,18 @@ function App() {
     }
   }, [status, result, selectedTextId, durationMinutes, hasSavedResult])
 
+  useEffect(() => {
+    document.title = selectedText ? `${selectedText.title} - Hızlı Klavye Sınavı` : 'Hızlı Klavye Sınavı'
+  }, [selectedText])
+
   const history = useMemo(
     () => getTestHistory(selectedTextId, durationMinutes),
     [selectedTextId, durationMinutes, hasSavedResult, isHistoryModalOpen]
   )
 
-  const provisionalWpm =
-    result?.wpm ?? calculateGrossWpm(inputValue.length, Math.max(elapsedSeconds, 1))
   const errorCount =
     result === undefined ? undefined : result.wordErrorCount
+  const isZenMode = status !== 'finished' && (isFocused || status === 'running')
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
@@ -245,15 +249,17 @@ function App() {
         onCategoryChange={handleCategoryChange}
         hasHistory={history.length > 0}
         onShowHistory={() => setIsHistoryModalOpen(true)}
+        isZenMode={isZenMode}
+        remainingSeconds={remainingSeconds}
       />
 
       <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <MetricStrip
-          remainingSeconds={remainingSeconds}
-          wpm={provisionalWpm}
-          accuracy={result?.accuracy}
-          errorCount={errorCount}
-        />
+        {!isZenMode && status === 'finished' && (
+          <MetricStrip
+            accuracy={result?.accuracy}
+            errorCount={errorCount}
+          />
+        )}
 
         {result === undefined ? (
           <TypingWorkspace
@@ -263,6 +269,8 @@ function App() {
             status={status}
             onInputChange={handleInputChange}
             onTypingKeyDown={handleTypingKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
           />
         ) : (
           <ResultPanel result={result} />

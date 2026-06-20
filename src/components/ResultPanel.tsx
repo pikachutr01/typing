@@ -10,7 +10,6 @@ export function ResultPanel({ result }: ResultPanelProps) {
     {
       label: 'Doğru kelime',
       value: result.correctWords,
-      detail: `${result.wordsPerMinute.toFixed(1)} kelime/dk`,
     },
     {
       label: 'Kelime hatası',

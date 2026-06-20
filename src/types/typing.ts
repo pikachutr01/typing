@@ -20,11 +20,9 @@ export type DiffSegment = {
 }
 
 export type TypingResult = {
-  wpm: number
   accuracy: number
   totalKeystrokes: number
   keystrokesPerMinute: number
-  wordsPerMinute: number
   wordErrorCount: number
   skippedWords: number
   extraSpaceErrors: number

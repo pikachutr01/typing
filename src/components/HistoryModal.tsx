@@ -81,7 +81,12 @@ export function HistoryModal({ isOpen, onClose, history }: HistoryModalProps) {
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center py-2">
+                    <div className="relative flex flex-col items-center justify-center py-2">
+                      {entry.isFailedBySkippedWords && (
+                        <div className="absolute top-0 right-2 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          BAŞARISIZ
+                        </div>
+                      )}
                       <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         Doğru Kelime
                       </div>
@@ -90,12 +95,23 @@ export function HistoryModal({ isOpen, onClose, history }: HistoryModalProps) {
                       </div>
                     </div>
 
-                    <div className="mt-auto grid grid-cols-3 gap-2 rounded-lg bg-slate-50 p-3 text-center dark:bg-slate-900">
-                      <div className="flex flex-col items-center">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Hız (DGS)</div>
-                        <div className="font-bold text-slate-700 dark:text-slate-300">{entry.wpm}</div>
+                    <div className="flex flex-wrap justify-center gap-4 pb-3 text-xs text-slate-500 dark:text-slate-400">
+                      <div className="flex flex-col items-center" title="Dakika başına tuş vuruşu">
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{entry.keystrokesPerMinute?.toFixed(0) ?? '-'}</span>
+                        <span className="text-[10px] uppercase">Vuruş/Dk</span>
                       </div>
-                      <div className="flex flex-col items-center border-l border-r border-slate-200 dark:border-slate-800">
+                      <div className="flex flex-col items-center" title="Toplam tuş vuruşu">
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{entry.totalKeystrokes ?? '-'}</span>
+                        <span className="text-[10px] uppercase">Vuruş</span>
+                      </div>
+                      <div className="flex flex-col items-center" title="Atlanan kelime sayısı">
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{entry.skippedWords ?? '-'}</span>
+                        <span className="text-[10px] uppercase">Atlanan</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-3 text-center dark:bg-slate-900">
+                      <div className="flex flex-col items-center border-r border-slate-200 dark:border-slate-800">
                         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Doğruluk</div>
                         <div className="font-bold text-slate-700 dark:text-slate-300">%{entry.accuracy}</div>
                       </div>

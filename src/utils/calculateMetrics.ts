@@ -12,11 +12,7 @@ function sumSegmentText(
   return segments.reduce((total, segment) => total + selector(segment).length, 0)
 }
 
-export function calculateGrossWpm(typedChars: number, elapsedSeconds: number) {
-  const elapsedMinutes = Math.max(elapsedSeconds / 60, 1 / 60)
 
-  return roundMetric(typedChars / 5 / elapsedMinutes)
-}
 
 export function calculateTypingResult(
   expectedText: string,
@@ -70,11 +66,9 @@ export function calculateTypingResult(
       : roundMetric((examEvaluation.correctWords / evaluatedWordCount) * 100)
 
   return {
-    wpm: calculateGrossWpm(correctChars, elapsedSeconds),
     accuracy,
     totalKeystrokes,
     keystrokesPerMinute: roundMetric(totalKeystrokes / elapsedMinutes),
-    wordsPerMinute: roundMetric(examEvaluation.correctWords / elapsedMinutes),
     wordErrorCount: examEvaluation.wordErrorCount,
     skippedWords: examEvaluation.skippedWords,
     extraSpaceErrors: examEvaluation.extraSpaceErrors,

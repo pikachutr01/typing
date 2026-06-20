@@ -1,6 +1,7 @@
-import { RotateCcw, Square, BarChart2 } from 'lucide-react'
+import { RotateCcw, Square, BarChart2, Clock } from 'lucide-react'
 import type { DurationMinutes, TestStatus, TypingText } from '../types/typing'
 import { ThemeToggle } from './ThemeToggle'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type SettingsPanelProps = {
   texts: TypingText[]
@@ -16,6 +17,8 @@ type SettingsPanelProps = {
   onCategoryChange: (category: string) => void
   hasHistory: boolean
   onShowHistory: () => void
+  isZenMode?: boolean
+  remainingSeconds?: number
 }
 
 const durations: DurationMinutes[] = [1, 3, 5, 7, 10]
@@ -36,63 +39,98 @@ export function SettingsPanel({
   onCategoryChange,
   hasHistory,
   onShowHistory,
+  isZenMode = false,
+  remainingSeconds = 0,
 }: SettingsPanelProps) {
   const isRunning = status === 'running'
 
+  const formattedRemainingTime = `${Math.floor(remainingSeconds / 60)}:${String(
+    remainingSeconds % 60,
+  ).padStart(2, '0')}`
+
   return (
-    <section className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 shadow-sm backdrop-blur transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950/95">
+    <section className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 shadow-sm backdrop-blur transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950/95 overflow-hidden">
       <div className="mx-auto flex flex-wrap w-full max-w-7xl items-end gap-3 px-4 py-3 sm:px-6 lg:px-8">
-        <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
-          Kategori
-          <select
-            className={controlClassName}
-            value={selectedCategory}
-            disabled={isRunning}
-            onChange={(event) => onCategoryChange(event.target.value)}
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </label>
+        
+        <AnimatePresence>
+          {!isZenMode && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0, marginTop: 0 }}
+              animate={{ height: 'auto', opacity: 1, marginTop: 0 }}
+              exit={{ height: 0, opacity: 0, marginTop: -8 }}
+              className="flex flex-wrap w-full lg:w-auto items-end gap-3 overflow-hidden"
+            >
+              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
+                Kategori
+                <select
+                  className={controlClassName}
+                  value={selectedCategory}
+                  disabled={isRunning}
+                  onChange={(event) => onCategoryChange(event.target.value)}
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-        <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1 min-w-[200px]">
-          Metin
-          <select
-            className={controlClassName}
-            value={selectedTextId}
-            disabled={isRunning}
-            onChange={(event) => onTextChange(event.target.value)}
-          >
-            {texts.map((text) => (
-              <option key={text.id} value={text.id}>
-                {text.title}
-              </option>
-            ))}
-          </select>
-        </label>
+              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1 min-w-[200px]">
+                Metin
+                <select
+                  className={controlClassName}
+                  value={selectedTextId}
+                  disabled={isRunning}
+                  onChange={(event) => onTextChange(event.target.value)}
+                >
+                  {texts.map((text) => (
+                    <option key={text.id} value={text.id}>
+                      {text.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-        <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
-          Süre
-          <select
-            className={controlClassName}
-            value={durationMinutes}
-            disabled={isRunning}
-            onChange={(event) =>
-              onDurationChange(Number(event.target.value) as DurationMinutes)
-            }
-          >
-            {durations.map((duration) => (
-              <option key={duration} value={duration}>
-                {duration} dk
-              </option>
-            ))}
-          </select>
-        </label>
+              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
+                Süre
+                <select
+                  className={controlClassName}
+                  value={durationMinutes}
+                  disabled={isRunning}
+                  onChange={(event) =>
+                    onDurationChange(Number(event.target.value) as DurationMinutes)
+                  }
+                >
+                  {durations.map((duration) => (
+                    <option key={duration} value={duration}>
+                      {duration} dk
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="flex gap-2">
+        <div className="flex flex-1 justify-end items-center gap-2">
+          {/* Zen Mode Timer */}
+          <AnimatePresence>
+            {isZenMode && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="flex items-center gap-2 mr-auto"
+              >
+                <div className="flex items-center gap-1.5 rounded-md bg-teal-100 px-3 py-1.5 text-sm font-bold text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">
+                  <Clock size={16} />
+                  <span>{formattedRemainingTime}</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {isRunning && (
             <button
               type="button"

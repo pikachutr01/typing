@@ -7,6 +7,8 @@ type TypingWorkspaceProps = {
   status: TestStatus
   onInputChange: (value: string) => void
   onTypingKeyDown: (key: string) => void
+  onFocus?: () => void
+  onBlur?: () => void
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -32,7 +34,7 @@ function getCharacterRect(container: HTMLDivElement, characterIndex: number) {
 
 export const TypingWorkspace = forwardRef<HTMLTextAreaElement, TypingWorkspaceProps>(
   function TypingWorkspace(
-    { targetText, inputValue, status, onInputChange, onTypingKeyDown },
+    { targetText, inputValue, status, onInputChange, onTypingKeyDown, onFocus, onBlur },
     ref,
   ) {
     const textScrollRef = useRef<HTMLDivElement>(null)
@@ -131,6 +133,8 @@ export const TypingWorkspace = forwardRef<HTMLTextAreaElement, TypingWorkspacePr
             disabled={status === 'finished'}
             placeholder="Yazmaya başladığında süre otomatik başlar."
             spellCheck={false}
+            onFocus={onFocus}
+            onBlur={onBlur}
             onKeyDown={(event) => onTypingKeyDown(event.key)}
             onChange={(event) => onInputChange(event.target.value)}
           />

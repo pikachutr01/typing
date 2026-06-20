@@ -3,7 +3,7 @@ import { calculateTypingResult } from './calculateMetrics'
 import { diffText } from './diffText'
 
 describe('calculateTypingResult', () => {
-  it('calculates WPM and perfect accuracy for exact input', () => {
+  it('calculates perfect accuracy for exact input', () => {
     const expectedText = 'abcde abcde'
     const segments = diffText(expectedText, expectedText)
     const result = calculateTypingResult(expectedText, expectedText, 60, segments)
@@ -12,8 +12,6 @@ describe('calculateTypingResult', () => {
     expect(result.correctWords).toBe(2)
     expect(result.totalKeystrokes).toBe(11)
     expect(result.keystrokesPerMinute).toBe(11)
-    expect(result.wordsPerMinute).toBe(2)
-    expect(result.wpm).toBe(2.2)
     expect(result.accuracy).toBe(100)
   })
 
@@ -45,6 +43,5 @@ describe('calculateTypingResult', () => {
 
     expect(result.totalKeystrokes).toBe(20)
     expect(result.keystrokesPerMinute).toBe(40)
-    expect(result.wordsPerMinute).toBe(4)
   })
 })
