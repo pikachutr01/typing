@@ -3,32 +3,48 @@ import { MetricStrip } from './components/MetricStrip'
 import { ResultPanel } from './components/ResultPanel'
 import { SettingsPanel } from './components/SettingsPanel'
 import { TypingWorkspace } from './components/TypingWorkspace'
-import { typingTexts } from './data/texts'
-import type { DurationMinutes, TestStatus } from './types/typing'
+import type { DurationMinutes, TestStatus, TypingText } from './types/typing'
 import { calculateTypingResult } from './utils/calculateMetrics'
 import { diffText } from './utils/diffText'
 import { getReachedExpectedText } from './utils/evaluateExamRules'
-import { getTestHistory, saveTestHistory } from './utils/history'
+import { checkTestHistory, saveTestHistory } from './utils/history'
 import { HistoryModal } from './components/HistoryModal'
+import { api } from './lib/api'
+import { useAuthStore } from './store/authStore'
+import { AuthModal } from './components/AuthModal'
 
 function isTypingKey(key: string) {
   return key.length === 1 || key === 'Backspace' || key === 'Delete' || key === 'Enter'
 }
 
 function App() {
-  const categories = useMemo(
-    () => Array.from(new Set(typingTexts.map((t) => t.category || 'Diğer'))),
-    []
-  )
+  const { user } = useAuthStore()
+  const [allTexts, setAllTexts] = useState<TypingText[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedTextId, setSelectedTextId] = useState<string | number>('')
 
-  const [selectedCategory, setSelectedCategory] = useState(categories[0])
-  
+  useEffect(() => {
+    api.get('/texts/all').then((res) => {
+      const fetchedTexts = res.data.map((t: any) => ({ ...t, category: t.category_name }))
+      setAllTexts(fetchedTexts)
+      const cats: string[] = Array.from(new Set(fetchedTexts.map((t: any) => t.category_name)))
+      setCategories(cats)
+      if (cats.length > 0) {
+        setSelectedCategory(cats[0])
+        const firstText = fetchedTexts.find((t: any) => t.category === cats[0])
+        if (firstText) setSelectedTextId(firstText.id)
+      }
+    }).catch(err => {
+      console.error(err)
+    })
+  }, [])
+
   const availableTexts = useMemo(
-    () => typingTexts.filter((t) => (t.category || 'Diğer') === selectedCategory),
-    [selectedCategory]
+    () => allTexts.filter((t) => (t.category || 'Diğer') === selectedCategory),
+    [allTexts, selectedCategory]
   )
 
-  const [selectedTextId, setSelectedTextId] = useState(availableTexts[0]?.id ?? typingTexts[0].id)
   const [durationMinutes, setDurationMinutes] = useState<DurationMinutes>(3)
   const [status, setStatus] = useState<TestStatus>('idle')
   const [inputValue, setInputValue] = useState('')
@@ -38,6 +54,8 @@ function App() {
   const [remainingSeconds, setRemainingSeconds] = useState(durationMinutes * 60)
   const [hasSavedResult, setHasSavedResult] = useState(false)
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [hasHistory, setHasHistory] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -65,21 +83,21 @@ function App() {
   }, [resetToIdle, totalSeconds])
 
   const handleTextChange = useCallback(
-    (textId: string) => {
+    (textId: string | number) => {
       setSelectedTextId(textId)
-      resetToIdle(totalSeconds)
+      resetToIdle(durationMinutes * 60)
     },
-    [resetToIdle, totalSeconds],
+    [durationMinutes, resetToIdle],
   )
 
   const handleCategoryChange = useCallback(
     (category: string) => {
       setSelectedCategory(category)
-      const newAvailable = typingTexts.filter((t) => (t.category || 'Diğer') === category)
-      setSelectedTextId(newAvailable[0]?.id ?? typingTexts[0].id)
+      const newAvailable = allTexts.filter((t) => (t.category || 'Diğer') === category)
+      setSelectedTextId(newAvailable[0]?.id ?? allTexts[0]?.id ?? '')
       resetToIdle(totalSeconds)
     },
-    [resetToIdle, totalSeconds],
+    [resetToIdle, totalSeconds, allTexts],
   )
 
   const handleDurationChange = useCallback(
@@ -215,19 +233,21 @@ function App() {
 
   useEffect(() => {
     if (status === 'finished' && result !== undefined && !hasSavedResult) {
-      saveTestHistory(selectedTextId, durationMinutes, result)
-      setHasSavedResult(true)
+      saveTestHistory(selectedTextId, durationMinutes, result, comparableInput).then(() => {
+        setHasSavedResult(true)
+      })
     }
-  }, [status, result, selectedTextId, durationMinutes, hasSavedResult])
+  }, [status, result, selectedTextId, durationMinutes, hasSavedResult, comparableInput])
 
   useEffect(() => {
     document.title = selectedText ? `${selectedText.title} - Hızlı Klavye Sınavı` : 'Hızlı Klavye Sınavı'
   }, [selectedText])
 
-  const history = useMemo(
-    () => getTestHistory(selectedTextId, durationMinutes),
-    [selectedTextId, durationMinutes, hasSavedResult, isHistoryModalOpen]
-  )
+  useEffect(() => {
+    if (selectedTextId) {
+      checkTestHistory(selectedTextId).then(setHasHistory)
+    }
+  }, [selectedTextId, hasSavedResult, isHistoryModalOpen, user])
 
   const errorCount =
     result === undefined ? undefined : result.wordErrorCount
@@ -247,10 +267,11 @@ function App() {
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
-        hasHistory={history.length > 0}
+        hasHistory={hasHistory}
         onShowHistory={() => setIsHistoryModalOpen(true)}
         isZenMode={isZenMode}
         remainingSeconds={remainingSeconds}
+        onLoginClick={() => setIsAuthModalOpen(true)}
       />
 
       <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-4 sm:px-6 lg:px-8">
@@ -280,8 +301,10 @@ function App() {
       <HistoryModal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
-        history={history}
+        textId={selectedTextId}
       />
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   )
 }

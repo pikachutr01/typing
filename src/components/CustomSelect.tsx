@@ -1,46 +1,86 @@
-import Select, { type Props as SelectProps } from 'react-select'
+import { Listbox, Transition } from '@headlessui/react'
+import { ChevronDown, Check } from 'lucide-react'
+import { Fragment } from 'react'
 
 export type OptionType = {
   value: string | number
   label: string
 }
 
-export function CustomSelect(props: SelectProps<OptionType, false>) {
+type CustomSelectProps = {
+  value: OptionType | null
+  options: OptionType[]
+  onChange: (option: OptionType | null) => void
+  isDisabled?: boolean
+  placeholder?: string
+}
+
+export function CustomSelect({
+  value,
+  options,
+  onChange,
+  isDisabled = false,
+  placeholder = 'Seçiniz...',
+}: CustomSelectProps) {
   return (
-    <Select
-      {...props}
-      menuPortalTarget={document.body}
-      styles={{
-        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-      }}
-      unstyled
-      classNames={{
-        control: ({ isFocused, isDisabled }) =>
-          `flex h-10 w-full rounded-md border bg-white px-3 text-sm shadow-sm transition-colors dark:bg-slate-900 ${
-            isDisabled
-              ? 'cursor-not-allowed border-slate-200 opacity-50 dark:border-slate-800'
-              : isFocused
-              ? 'border-teal-600 ring-2 ring-teal-600/20 dark:border-teal-500 dark:ring-teal-500/30'
-              : 'border-slate-300 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-600'
-          }`,
-        menu: () =>
-          'mt-1 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900 z-50',
-        menuList: () => 'max-h-60 overflow-y-auto p-1',
-        option: ({ isFocused, isSelected }) =>
-          `cursor-pointer rounded-sm px-3 py-2 text-sm transition-colors ${
-            isSelected
-              ? 'bg-teal-600 text-white dark:bg-teal-600'
-              : isFocused
-              ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-              : 'text-slate-700 dark:text-slate-300'
-          }`,
-        placeholder: () => 'text-slate-500 dark:text-slate-400',
-        singleValue: () => 'text-slate-900 dark:text-slate-100',
-        input: () => 'text-slate-900 dark:text-slate-100',
-        indicatorSeparator: () => 'bg-slate-200 dark:bg-slate-700 my-2',
-        dropdownIndicator: () => 'p-1 text-slate-400 hover:text-slate-500 dark:text-slate-500 dark:hover:text-slate-400 cursor-pointer',
-        valueContainer: () => 'gap-1 px-1',
-      }}
-    />
+    <Listbox value={value} onChange={onChange} disabled={isDisabled}>
+      {() => (
+        <div className="relative w-full">
+          <Listbox.Button
+            className={`relative w-full flex h-10 items-center justify-between overflow-hidden rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition-colors dark:bg-slate-900 ${
+              isDisabled
+                ? 'cursor-not-allowed border-slate-200 opacity-50 dark:border-slate-800'
+                : 'border-slate-300 hover:border-slate-400 focus-within:border-teal-600 focus-within:ring-2 focus-within:ring-teal-600/20 dark:border-slate-700 dark:hover:border-slate-600 dark:focus-within:border-teal-500 dark:focus-within:ring-teal-500/30'
+            }`}
+          >
+            <span className="block truncate text-slate-900 dark:text-slate-100">
+              {value?.label || placeholder}
+            </span>
+            <span className="pointer-events-none flex items-center">
+              <ChevronDown
+                className="h-4 w-4 text-slate-400 dark:text-slate-500"
+                aria-hidden="true"
+              />
+            </span>
+          </Listbox.Button>
+
+          <Transition
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Listbox.Options className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-800 dark:bg-slate-900 outline-none">
+              {options.map((option) => (
+                <Listbox.Option
+                  key={option.value}
+                  className={({ active, selected }) =>
+                    `relative cursor-pointer select-none rounded-sm py-2 pl-3 pr-9 text-sm transition-colors ${
+                      active || selected
+                        ? 'bg-teal-600 text-white dark:bg-teal-600'
+                        : 'text-slate-700 dark:text-slate-300'
+                    }`
+                  }
+                  value={option}
+                >
+                  {({ selected }) => (
+                    <>
+                      <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
+                        {option.label}
+                      </span>
+                      {selected ? (
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-3">
+                          <Check className="h-4 w-4" aria-hidden="true" />
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </Listbox.Option>
+              ))}
+            </Listbox.Options>
+          </Transition>
+        </div>
+      )}
+    </Listbox>
   )
 }

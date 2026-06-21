@@ -42,5 +42,8 @@ export type TypingResult = {
 export type TestHistoryEntry = Omit<TypingResult, 'diffSegments'> & {
   date: string
   textId: string
+  textTitle?: string
   durationMinutes: DurationMinutes
+  originalText: string
+  inputValue: string
 }
