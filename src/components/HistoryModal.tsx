@@ -10,11 +10,12 @@ type HistoryModalProps = {
   isOpen: boolean
   onClose: () => void
   textId: string | number | undefined
+  textTitle?: string
 }
 
 const LIMIT = 20
 
-export function HistoryModal({ isOpen, onClose, textId }: HistoryModalProps) {
+export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModalProps) {
   const [selectedEntry, setSelectedEntry] = useState<TestHistoryEntry | null>(null)
 
   const [durations, setDurations] = useState<number[]>([])
@@ -124,8 +125,22 @@ export function HistoryModal({ isOpen, onClose, textId }: HistoryModalProps) {
                 <BarChart2 size={24} />
               </div>
             )}
-            <h2 className="text-xl font-bold">
-              {selectedEntry ? 'Sınav Detayı' : 'Geçmiş Performanslar'}
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              {selectedEntry ? (
+                'Sınav Detayı'
+              ) : (
+                <>
+                  Geçmiş Performanslar
+                  {textTitle && (
+                    <>
+                      <span className="text-slate-400 dark:text-slate-600">/</span>
+                      <span className="text-lg font-medium text-slate-600 dark:text-slate-400">
+                        {textTitle}
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
             </h2>
           </div>
           <button

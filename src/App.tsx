@@ -317,6 +317,7 @@ function App() {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             isZenMode={isZenMode}
+            remainingSeconds={remainingSeconds}
           />
         ) : (
           <ResultPanel result={result} />
@@ -327,6 +328,7 @@ function App() {
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
         textId={selectedTextId}
+        textTitle={selectedText ? `${selectedText.category || 'Diğer'} - ${selectedText.title}` : undefined}
       />
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

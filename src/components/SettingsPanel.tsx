@@ -51,7 +51,7 @@ export function SettingsPanel({
 }: SettingsPanelProps) {
   const isRunning = status === 'running'
   const { user, logout } = useAuthStore()
-  const { fontSizeDelta, setFontSizeDelta, resetFontSizeDelta } = useSettingsStore()
+  const { fontSizeDelta, setFontSizeDelta, resetFontSizeDelta, isColorWarningEnabled, toggleColorWarningEnabled } = useSettingsStore()
 
   const [isSelectExited, setIsSelectExited] = useState(false)
 
@@ -216,7 +216,7 @@ export function SettingsPanel({
 
             <MenuItems
               transition
-              className="absolute right-0 z-30 mt-2 w-56 origin-top-right rounded-md border border-slate-200 bg-white p-2 shadow-lg outline-none transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 dark:border-slate-700 dark:bg-slate-800"
+              className="absolute right-0 z-30 mt-2 w-64 origin-top-right rounded-md border border-slate-200 bg-white p-2 shadow-lg outline-none transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 dark:border-slate-700 dark:bg-slate-800"
             >
               <div className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Yazı Boyutu
@@ -242,6 +242,26 @@ export function SettingsPanel({
                   title="Büyüt"
                 >
                   <Plus className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="my-2 border-t border-slate-100 dark:border-slate-700/50"></div>
+
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Süre Uyarısı</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">Son 10 saniye</span>
+                </div>
+                <button
+                  role="switch"
+                  aria-checked={isColorWarningEnabled}
+                  onClick={() => toggleColorWarningEnabled()}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 ${isColorWarningEnabled ? 'bg-teal-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isColorWarningEnabled ? 'translate-x-4' : 'translate-x-0'}`}
+                  />
                 </button>
               </div>
             </MenuItems>
