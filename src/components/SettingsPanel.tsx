@@ -1,5 +1,6 @@
-import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus } from 'lucide-react'
-import { Menu, MenuButton, MenuItems } from '@headlessui/react'
+import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus, Shield } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import type { DurationMinutes, TestStatus, TypingText } from '../types/typing'
 import { ThemeToggle } from './ThemeToggle'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -264,6 +265,25 @@ export function SettingsPanel({
                   />
                 </button>
               </div>
+              
+              {user?.username === 'admin' && (
+                <>
+                  <div className="my-2 border-t border-slate-100 dark:border-slate-700/50"></div>
+                  <MenuItem>
+                    {({ active }) => (
+                      <Link
+                        to="/manage"
+                        className={`${
+                          active ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'
+                        } flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm font-medium transition-colors`}
+                      >
+                        <Shield className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                        Yönetim Paneli
+                      </Link>
+                    )}
+                  </MenuItem>
+                </>
+              )}
             </MenuItems>
           </Menu>
 

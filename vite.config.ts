@@ -8,4 +8,28 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor-react'
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-framer'
+            }
+            if (id.includes('@headlessui')) {
+              return 'vendor-headlessui'
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-lucide'
+            }
+            return 'vendor'
+          }
+        }
+      }
+    }
+  }
 })

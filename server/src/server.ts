@@ -7,6 +7,7 @@ import { apiLimiter } from './middlewares/rateLimit'
 import authRoutes from './routes/auth'
 import textRoutes from './routes/texts'
 import historyRoutes from './routes/history'
+import adminRoutes from './routes/admin'
 
 dotenv.config()
 
@@ -20,6 +21,7 @@ app.use(apiLimiter)
 app.use('/api/auth', authRoutes)
 app.use('/api/texts', textRoutes)
 app.use('/api/history', historyRoutes)
+app.use('/api/admin', adminRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })
