@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef } from 'react'
 import type { TestStatus } from '../types/typing'
+import { useSettingsStore } from '../store/settingsStore'
 
 type TypingWorkspaceProps = {
   targetText: string
@@ -9,6 +10,7 @@ type TypingWorkspaceProps = {
   onTypingKeyDown: (key: string) => void
   onFocus?: () => void
   onBlur?: () => void
+  isZenMode?: boolean
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -34,9 +36,10 @@ function getCharacterRect(container: HTMLDivElement, characterIndex: number) {
 
 export const TypingWorkspace = forwardRef<HTMLTextAreaElement, TypingWorkspaceProps>(
   function TypingWorkspace(
-    { targetText, inputValue, status, onInputChange, onTypingKeyDown, onFocus, onBlur },
+    { targetText, inputValue, status, onInputChange, onTypingKeyDown, onFocus, onBlur, isZenMode = false },
     ref,
   ) {
+    const { fontSizeDelta } = useSettingsStore()
     const textScrollRef = useRef<HTMLDivElement>(null)
     const scrollAnimationRef = useRef<number | null>(null)
     const progressIndex = clamp(inputValue.trimEnd().length, 0, targetText.length)
@@ -113,22 +116,35 @@ export const TypingWorkspace = forwardRef<HTMLTextAreaElement, TypingWorkspacePr
       }
     }, [])
 
+    const textStyle = {
+      fontSize: `calc(1.125rem + ${fontSizeDelta}px)`,
+      lineHeight: `calc(2rem + ${fontSizeDelta * 1.5}px)`
+    }
+
     return (
-      <section className="grid gap-4">
-        <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm transition-colors duration-200 dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+      <section className={`flex flex-col gap-4 transition-all duration-500 ${isZenMode ? 'flex-1 min-h-0' : ''}`}>
+        <div 
+          className="rounded-md border border-slate-200 bg-white p-4 shadow-sm transition-all duration-500 ease-in-out dark:border-slate-800 dark:bg-slate-900 sm:p-5 flex flex-col overflow-hidden shrink-0"
+          style={{ height: isZenMode ? '22rem' : '16rem' }}
+        >
           <div
             ref={textScrollRef}
-            className="max-h-64 overflow-y-auto scroll-smooth whitespace-pre-wrap pr-2 text-left text-lg leading-8 text-slate-800 dark:text-slate-200"
+            className="flex-1 min-h-0 overflow-y-auto scroll-smooth whitespace-pre-wrap pr-2 text-left text-slate-800 dark:text-slate-200"
+            style={textStyle}
           >
             {targetText}
           </div>
         </div>
 
-        <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm transition-colors duration-200 dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+        <div 
+          className="rounded-md border border-slate-200 bg-white p-4 shadow-sm transition-all duration-500 ease-in-out dark:border-slate-800 dark:bg-slate-900 sm:p-5 flex flex-col overflow-hidden shrink-0"
+          style={{ height: isZenMode ? 'calc(100vh - 30rem)' : '16rem' }}
+        >
           <textarea
             ref={ref}
             id="typing-input"
-            className="min-h-56 w-full resize-y rounded-md border border-slate-300 bg-slate-50 p-4 text-lg leading-8 text-slate-900 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-teal-500 dark:focus:bg-slate-950 dark:focus:ring-teal-500/30 sm:min-h-64"
+            className="w-full h-full flex-1 min-h-0 resize-none rounded-md border border-slate-300 bg-slate-50 p-4 text-slate-900 shadow-inner outline-none transition-colors placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-600/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-teal-500 dark:focus:bg-slate-950 dark:focus:ring-teal-500/30"
+            style={textStyle}
             value={inputValue}
             disabled={status === 'finished'}
             placeholder="Yazmaya başladığında süre otomatik başlar."
@@ -137,6 +153,7 @@ export const TypingWorkspace = forwardRef<HTMLTextAreaElement, TypingWorkspacePr
             onBlur={onBlur}
             onKeyDown={(event) => onTypingKeyDown(event.key)}
             onChange={(event) => onInputChange(event.target.value)}
+            onPaste={(e) => e.preventDefault()}
           />
         </div>
       </section>

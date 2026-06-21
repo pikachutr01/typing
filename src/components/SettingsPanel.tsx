@@ -1,9 +1,11 @@
-import { RotateCcw, Square, BarChart2, Clock } from 'lucide-react'
+import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus } from 'lucide-react'
+import { Menu, MenuButton, MenuItems } from '@headlessui/react'
 import type { DurationMinutes, TestStatus, TypingText } from '../types/typing'
 import { ThemeToggle } from './ThemeToggle'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CustomSelect } from './CustomSelect'
 import { useAuthStore } from '../store/authStore'
+import { useSettingsStore } from '../store/settingsStore'
 import React, { useMemo, useState } from 'react'
 
 type SettingsPanelProps = {
@@ -23,6 +25,7 @@ type SettingsPanelProps = {
   isZenMode?: boolean
   remainingSeconds?: number
   onLoginClick?: () => void
+  isMobile?: boolean
 }
 
 const durations: DurationMinutes[] = [1, 3, 5, 7, 10]
@@ -44,9 +47,11 @@ export function SettingsPanel({
   isZenMode = false,
   remainingSeconds = 0,
   onLoginClick,
+  isMobile = false,
 }: SettingsPanelProps) {
   const isRunning = status === 'running'
   const { user, logout } = useAuthStore()
+  const { fontSizeDelta, setFontSizeDelta, resetFontSizeDelta } = useSettingsStore()
 
   const [isSelectExited, setIsSelectExited] = useState(false)
 
@@ -75,15 +80,16 @@ export function SettingsPanel({
 
   return (
     <section className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 shadow-sm backdrop-blur transition-colors duration-200 dark:border-slate-800 dark:bg-slate-950/95">
-      <div className="mx-auto flex flex-wrap w-full max-w-7xl items-end gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex flex-wrap w-full max-w-[90rem] items-end gap-3 px-4 py-3 sm:px-6 lg:px-8">
         
         <AnimatePresence onExitComplete={() => setIsSelectExited(true)}>
           {!isZenMode && (
             <motion.div 
-              initial={{ height: 0, opacity: 0, marginTop: 0 }}
-              animate={{ height: 'auto', opacity: 1, marginTop: 0 }}
-              exit={{ height: 0, opacity: 0, marginTop: -8 }}
-              className="flex flex-wrap w-full lg:w-auto items-end gap-3"
+              initial={{ height: 0, opacity: 0, marginTop: 0, overflow: 'hidden' }}
+              animate={{ height: 'auto', opacity: 1, marginTop: 0, overflow: 'visible' }}
+              exit={{ height: 0, opacity: 0, marginTop: -8, overflow: 'hidden' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="flex flex-1 flex-wrap items-end gap-4"
             >
               <div className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 min-w-[150px]">
                 <span>Kategori</span>
@@ -97,7 +103,7 @@ export function SettingsPanel({
                 />
               </div>
 
-              <div className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1 min-w-[250px]">
+              <div className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1 min-w-[180px]">
                 <span>Metin</span>
                 <CustomSelect
                   value={textOptions.find(o => o.value === selectedTextId) || null}
@@ -125,8 +131,7 @@ export function SettingsPanel({
           )}
         </AnimatePresence>
 
-        <div className="flex flex-1 justify-end items-center gap-2">
-          {/* Zen Mode Timer */}
+        <div className="flex w-full lg:w-auto flex-1 justify-end items-center gap-2 flex-wrap">
           <AnimatePresence>
             {isZenMode && isSelectExited && (
               <motion.div
@@ -143,7 +148,7 @@ export function SettingsPanel({
             )}
           </AnimatePresence>
 
-          {isRunning && (
+          {isRunning && !isMobile && (
             <button
               type="button"
               className="inline-flex h-10 items-center gap-2 rounded-md bg-slate-800 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500/30 dark:bg-slate-700 dark:hover:bg-slate-600"
@@ -163,14 +168,16 @@ export function SettingsPanel({
               Geçmişi Gör
             </button>
           )}
-          <button
-            type="button"
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500/25 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:focus:ring-slate-500/30"
-            onClick={onReset}
-          >
-            <RotateCcw size={17} />
-            Sıfırla
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500/25 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:focus:ring-slate-500/30"
+              onClick={onReset}
+            >
+              <RotateCcw size={17} />
+              Sıfırla
+            </button>
+          )}
           
           {!isZenMode && (
             user ? (
@@ -200,6 +207,45 @@ export function SettingsPanel({
               </div>
             )
           )}
+
+          <Menu as="div" className="relative inline-block text-left">
+            <MenuButton className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500/50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800" title="Ayarlar">
+              <span className="sr-only">Ayarlar</span>
+              <Settings className="h-5 w-5" />
+            </MenuButton>
+
+            <MenuItems
+              transition
+              className="absolute right-0 z-30 mt-2 w-56 origin-top-right rounded-md border border-slate-200 bg-white p-2 shadow-lg outline-none transition duration-100 ease-out [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 dark:border-slate-700 dark:bg-slate-800"
+            >
+              <div className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Yazı Boyutu
+              </div>
+              <div className="mt-1 flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 p-1 dark:border-slate-700/50 dark:bg-slate-900">
+                <button
+                  onClick={() => setFontSizeDelta((d) => Math.max(-8, d - 2))}
+                  className="rounded-md p-1.5 text-slate-700 shadow-sm hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
+                  title="Küçült"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => resetFontSizeDelta()}
+                  className="px-2 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                  title="Varsayılana Dön"
+                >
+                  {fontSizeDelta > 0 ? `+${fontSizeDelta}` : fontSizeDelta}
+                </button>
+                <button
+                  onClick={() => setFontSizeDelta((d) => Math.min(24, d + 2))}
+                  className="rounded-md p-1.5 text-slate-700 shadow-sm hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
+                  title="Büyüt"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </MenuItems>
+          </Menu>
 
           <ThemeToggle />
         </div>

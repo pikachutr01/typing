@@ -12,12 +12,15 @@ import { HistoryModal } from './components/HistoryModal'
 import { api } from './lib/api'
 import { useAuthStore } from './store/authStore'
 import { AuthModal } from './components/AuthModal'
+import { useIsMobile } from './hooks/useIsMobile'
+import { MonitorSmartphone } from 'lucide-react'
 
 function isTypingKey(key: string) {
   return key.length === 1 || key === 'Backspace' || key === 'Delete' || key === 'Enter'
 }
 
 function App() {
+  const isMobile = useIsMobile()
   const { user } = useAuthStore()
   const [allTexts, setAllTexts] = useState<TypingText[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -116,6 +119,7 @@ function App() {
 
       setEndedAt(Date.now())
       setRemainingSeconds(0)
+      inputRef.current?.blur()
       return 'finished'
     })
   }, [])
@@ -254,7 +258,7 @@ function App() {
   const isZenMode = status !== 'finished' && (isFocused || status === 'running')
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
+    <div className={`flex flex-col bg-slate-50 text-slate-800 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100 ${isZenMode ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
       <SettingsPanel
         texts={availableTexts}
         selectedTextId={selectedTextId}
@@ -272,17 +276,37 @@ function App() {
         isZenMode={isZenMode}
         remainingSeconds={remainingSeconds}
         onLoginClick={() => setIsAuthModalOpen(true)}
+        isMobile={isMobile}
       />
 
-      <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        {!isZenMode && status === 'finished' && (
+      <main className="flex-1 mx-auto flex flex-col w-full max-w-[90rem] gap-4 px-4 py-4 sm:px-6 lg:px-8 min-h-0">
+        {!isZenMode && status === 'finished' && !isMobile && (
           <MetricStrip
             accuracy={result?.accuracy}
             errorCount={errorCount}
           />
         )}
 
-        {result === undefined ? (
+        {isMobile ? (
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 sm:p-12 max-w-lg w-full shadow-xl shadow-teal-500/5 border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-6">
+              <div className="bg-teal-50 dark:bg-teal-900/30 p-4 rounded-full text-teal-600 dark:text-teal-400">
+                <MonitorSmartphone size={48} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mb-3">Mobil Cihaz Tespit Edildi</h2>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                  Klavye hız testi, doğru ve adil bir ölçüm yapabilmek adına dokunmatik klavyelerde desteklenmemektedir. Lütfen testi uygulamak için fiziksel bir klavyeye sahip bilgisayar üzerinden giriş yapınız.
+                </p>
+                <div className="bg-slate-50 dark:bg-slate-950/50 rounded-lg p-4 border border-slate-100 dark:border-slate-800/50">
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-500">
+                    💡 Üst menüyü kullanarak geçmiş analizlerinizi görüntüleyebilir veya giriş yapabilirsiniz.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : result === undefined ? (
           <TypingWorkspace
             ref={inputRef}
             targetText={targetText}
@@ -292,6 +316,7 @@ function App() {
             onTypingKeyDown={handleTypingKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            isZenMode={isZenMode}
           />
         ) : (
           <ResultPanel result={result} />

@@ -18,6 +18,7 @@ export function HistoryModal({ isOpen, onClose, textId }: HistoryModalProps) {
   const [selectedEntry, setSelectedEntry] = useState<TestHistoryEntry | null>(null)
 
   const [durations, setDurations] = useState<number[]>([])
+  const [isDurationsLoading, setIsDurationsLoading] = useState(true)
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null)
   const [historyItems, setHistoryItems] = useState<TestHistoryEntry[]>([])
   const [loading, setLoading] = useState(false)
@@ -26,14 +27,17 @@ export function HistoryModal({ isOpen, onClose, textId }: HistoryModalProps) {
 
   useEffect(() => {
     if (isOpen && textId) {
+      setIsDurationsLoading(true)
       getTestHistoryDurations(textId).then(durs => {
         setDurations(durs)
         if (durs.length > 0) {
           setSelectedDuration(durs[0])
         }
+        setIsDurationsLoading(false)
       })
     } else {
       setDurations([])
+      setIsDurationsLoading(true)
       setSelectedDuration(null)
       setHistoryItems([])
       setPage(0)
@@ -103,7 +107,7 @@ export function HistoryModal({ isOpen, onClose, textId }: HistoryModalProps) {
       />
       
       {/* Main Modal */}
-      <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-slate-50 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-900">
+      <div className="relative flex min-h-[500px] sm:min-h-[600px] max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-slate-50 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-900">
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950 shrink-0">
@@ -153,7 +157,12 @@ export function HistoryModal({ isOpen, onClose, textId }: HistoryModalProps) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6" onScroll={handleScroll}>
-          {selectedEntry ? (
+          {isDurationsLoading || (loading && historyItems.length === 0) ? (
+            <div className="flex h-full flex-col items-center justify-center py-12 text-slate-500">
+              <Loader2 size={48} className="animate-spin mb-4 text-teal-500" />
+              <p className="text-lg">Kayıtlar yükleniyor...</p>
+            </div>
+          ) : selectedEntry ? (
             <div className="flex flex-col gap-6">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
@@ -188,7 +197,7 @@ export function HistoryModal({ isOpen, onClose, textId }: HistoryModalProps) {
               </div>
             </div>
           ) : durations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-500 dark:text-slate-400">
+            <div className="flex h-full flex-col items-center justify-center py-12 text-slate-500 dark:text-slate-400">
               <BarChart2 size={48} className="mb-4 opacity-20" />
               <p className="text-lg">Henüz bu metin için geçmiş kayıt bulunmuyor.</p>
             </div>

@@ -15,3 +15,10 @@ select,
 textarea {
   font: inherit;
 }
+
+button,
+[role="button"],
+[role="option"],
+[role="tab"] {
+  cursor: pointer;
+}
