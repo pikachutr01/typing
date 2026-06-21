@@ -2,6 +2,7 @@ import { RotateCcw, Square, BarChart2, Clock } from 'lucide-react'
 import type { DurationMinutes, TestStatus, TypingText } from '../types/typing'
 import { ThemeToggle } from './ThemeToggle'
 import { motion, AnimatePresence } from 'framer-motion'
+import { CustomSelect } from './CustomSelect'
 
 type SettingsPanelProps = {
   texts: TypingText[]
@@ -22,8 +23,6 @@ type SettingsPanelProps = {
 }
 
 const durations: DurationMinutes[] = [1, 3, 5, 7, 10]
-const controlClassName =
-  'h-10 rounded-md border border-slate-300 bg-white px-3 text-slate-800 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20 disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:focus:border-teal-500 dark:focus:ring-teal-500/30 dark:disabled:bg-slate-800 dark:disabled:text-slate-500'
 
 export function SettingsPanel({
   texts,
@@ -60,54 +59,47 @@ export function SettingsPanel({
               exit={{ height: 0, opacity: 0, marginTop: -8 }}
               className="flex flex-wrap w-full lg:w-auto items-end gap-3 overflow-hidden"
             >
-              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
+              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 min-w-[150px]">
                 Kategori
-                <select
-                  className={controlClassName}
-                  value={selectedCategory}
-                  disabled={isRunning}
-                  onChange={(event) => onCategoryChange(event.target.value)}
-                >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
+                <CustomSelect
+                  value={{ value: selectedCategory, label: selectedCategory }}
+                  options={categories.map((c) => ({ value: c, label: c }))}
+                  isDisabled={isRunning}
+                  onChange={(option) => {
+                    if (option) onCategoryChange(option.value as string)
+                  }}
+                  isSearchable={false}
+                />
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1 min-w-[200px]">
+              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1 min-w-[250px]">
                 Metin
-                <select
-                  className={controlClassName}
-                  value={selectedTextId}
-                  disabled={isRunning}
-                  onChange={(event) => onTextChange(event.target.value)}
-                >
-                  {texts.map((text) => (
-                    <option key={text.id} value={text.id}>
-                      {text.title}
-                    </option>
-                  ))}
-                </select>
+                <CustomSelect
+                  value={{
+                    value: selectedTextId,
+                    label: texts.find((t) => t.id === selectedTextId)?.title ?? '',
+                  }}
+                  options={texts.map((t) => ({ value: t.id, label: t.title }))}
+                  isDisabled={isRunning}
+                  onChange={(option) => {
+                    if (option) onTextChange(option.value as string)
+                  }}
+                  isSearchable={true}
+                  placeholder="Metin ara..."
+                />
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
+              <label className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 min-w-[120px]">
                 Süre
-                <select
-                  className={controlClassName}
-                  value={durationMinutes}
-                  disabled={isRunning}
-                  onChange={(event) =>
-                    onDurationChange(Number(event.target.value) as DurationMinutes)
-                  }
-                >
-                  {durations.map((duration) => (
-                    <option key={duration} value={duration}>
-                      {duration} dk
-                    </option>
-                  ))}
-                </select>
+                <CustomSelect
+                  value={{ value: durationMinutes, label: `${durationMinutes} dk` }}
+                  options={durations.map((d) => ({ value: d, label: `${d} dk` }))}
+                  isDisabled={isRunning}
+                  onChange={(option) => {
+                    if (option) onDurationChange(Number(option.value) as DurationMinutes)
+                  }}
+                  isSearchable={false}
+                />
               </label>
             </motion.div>
           )}
