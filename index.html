@@ -6,6 +6,14 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Klavye Test</title>
+  <script>
+    try {
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.backgroundColor = '#0f172a'; // slate-900 or whatever dark bg is
+      }
+    } catch (_) {}
+  </script>
 </head>
 
 <body>
