@@ -1,6 +1,7 @@
+import dotenv from 'dotenv'
+dotenv.config()
 import express from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import { checkConnection } from './config/db'
 import { apiLimiter } from './middlewares/rateLimit'
 
@@ -8,8 +9,6 @@ import authRoutes from './routes/auth'
 import textRoutes from './routes/texts'
 import historyRoutes from './routes/history'
 import adminRoutes from './routes/admin'
-
-dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3001
