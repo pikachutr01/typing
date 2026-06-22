@@ -1,4 +1,4 @@
-import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus, Shield } from 'lucide-react'
+import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus, Shield, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import type { DurationMinutes, TestStatus, TypingText } from '../types/typing'
@@ -8,6 +8,7 @@ import { CustomSelect } from './CustomSelect'
 import { useAuthStore } from '../store/authStore'
 import { useSettingsStore } from '../store/settingsStore'
 import React, { useMemo, useState } from 'react'
+import { ConfirmationDialog } from './ConfirmationDialog'
 
 type SettingsPanelProps = {
   texts: TypingText[]
@@ -55,6 +56,7 @@ export function SettingsPanel({
   const { fontSizeDelta, setFontSizeDelta, resetFontSizeDelta, isColorWarningEnabled, toggleColorWarningEnabled } = useSettingsStore()
 
   const [isSelectExited, setIsSelectExited] = useState(false)
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false)
 
   React.useEffect(() => {
     if (!isZenMode) {
@@ -104,7 +106,7 @@ export function SettingsPanel({
                 />
               </div>
 
-              <div className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 flex-1 min-w-[180px]">
+              <div className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 w-full sm:w-[150px]">
                 <span>Metin</span>
                 <CustomSelect
                   value={textOptions.find(o => o.value === selectedTextId) || null}
@@ -180,33 +182,17 @@ export function SettingsPanel({
             </button>
           )}
           
-          {!isZenMode && (
-            user ? (
-              <div className="flex items-center gap-3 border-l border-slate-200 pl-3 dark:border-slate-700 ml-1">
-                <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                  {user.username}
-                </span>
-                <button
-                  type="button"
-                  onClick={logout}
-                  disabled={isRunning}
-                  className="flex h-10 items-center justify-center rounded-md bg-slate-200 px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-300 disabled:opacity-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                >
-                  Çıkış Yap
-                </button>
-              </div>
-            ) : (
-              <div className="border-l border-slate-200 pl-3 dark:border-slate-700 ml-1">
-                <button
-                  type="button"
-                  onClick={onLoginClick}
-                  disabled={isRunning}
-                  className="flex h-10 items-center justify-center rounded-md bg-teal-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50 dark:bg-teal-600 dark:hover:bg-teal-500"
-                >
-                  Giriş Yap
-                </button>
-              </div>
-            )
+          {!isZenMode && !user && (
+            <div className="border-l border-slate-200 pl-3 dark:border-slate-700 ml-1">
+              <button
+                type="button"
+                onClick={onLoginClick}
+                disabled={isRunning}
+                className="flex h-10 items-center justify-center rounded-md bg-teal-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50 dark:bg-teal-600 dark:hover:bg-teal-500"
+              >
+                Giriş Yap
+              </button>
+            </div>
           )}
 
           <Menu as="div" className="relative inline-block text-left">
@@ -266,22 +252,42 @@ export function SettingsPanel({
                 </button>
               </div>
               
-              {user?.username === 'admin' && (
+              {user && (
                 <>
                   <div className="my-2 border-t border-slate-100 dark:border-slate-700/50"></div>
-                  <MenuItem>
-                    {({ active }) => (
-                      <Link
-                        to="/manage"
-                        className={`${
-                          active ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'
-                        } flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm font-medium transition-colors`}
-                      >
-                        <Shield className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                        Yönetim Paneli
-                      </Link>
+                  <div className="px-2 py-1.5 flex flex-col gap-2">
+                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 px-1">
+                      KULLANICI: <span className="text-slate-700 dark:text-slate-300">{user.username}</span>
+                    </div>
+                    {user.username === 'admin' && (
+                      <MenuItem>
+                        {({ active }) => (
+                          <Link
+                            to="/manage"
+                            className={`${
+                              active ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'
+                            } flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm font-medium transition-colors`}
+                          >
+                            <Shield className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                            Yönetim Paneli
+                          </Link>
+                        )}
+                      </MenuItem>
                     )}
-                  </MenuItem>
+                    <MenuItem>
+                      {({ active }) => (
+                        <button
+                          onClick={() => setIsLogoutConfirmOpen(true)}
+                          className={`${
+                            active ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'
+                          } flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm font-medium transition-colors text-left`}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Çıkış Yap
+                        </button>
+                      )}
+                    </MenuItem>
+                  </div>
                 </>
               )}
             </MenuItems>
@@ -290,6 +296,16 @@ export function SettingsPanel({
           <ThemeToggle />
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={logout}
+        title="Çıkış Yap"
+        message="Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
+        confirmText="Çıkış Yap"
+        cancelText="Vazgeç"
+      />
     </section>
   )
 }

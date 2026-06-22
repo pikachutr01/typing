@@ -128,18 +128,12 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
             <h2 className="text-xl font-bold flex items-center gap-2">
               {selectedEntry ? (
                 'Sınav Detayı'
+              ) : textTitle ? (
+                <span className="text-base font-semibold text-slate-700 dark:text-slate-300">
+                  {textTitle}
+                </span>
               ) : (
-                <>
-                  Geçmiş Performanslar
-                  {textTitle && (
-                    <>
-                      <span className="text-slate-400 dark:text-slate-600">/</span>
-                      <span className="text-lg font-medium text-slate-600 dark:text-slate-400">
-                        {textTitle}
-                      </span>
-                    </>
-                  )}
-                </>
+                'Geçmiş Performanslar'
               )}
             </h2>
           </div>
@@ -171,7 +165,7 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6" onScroll={handleScroll}>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6" onScroll={handleScroll}>
           {isDurationsLoading || (loading && historyItems.length === 0) ? (
             <div className="flex h-full flex-col items-center justify-center py-12 text-slate-500">
               <Loader2 size={48} className="animate-spin mb-4 text-teal-500" />
@@ -179,27 +173,27 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
             </div>
           ) : selectedEntry ? (
             <div className="flex flex-col gap-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                  <div className="text-sm font-semibold text-slate-600 dark:text-slate-400">Doğru kelime</div>
-                  <div className="mt-2 text-2xl font-bold text-teal-600 dark:text-teal-500">{selectedEntry.correctWords}</div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-4">
+                <div className="rounded-md border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 flex flex-col justify-center">
+                  <div className="text-[11px] sm:text-sm font-semibold text-slate-600 dark:text-slate-400">Doğru kelime</div>
+                  <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-teal-600 dark:text-teal-500">{selectedEntry.correctWords}</div>
                 </div>
-                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                  <div className="text-sm font-semibold text-slate-600 dark:text-slate-400">Kelime hatası</div>
-                  <div className="mt-2 text-2xl font-bold text-red-500 dark:text-red-400">{selectedEntry.wordErrorCount}</div>
-                  <div className="mt-1 text-xs text-slate-500">{selectedEntry.extraSpaceErrors} fazla boşluk</div>
+                <div className="rounded-md border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 flex flex-col justify-center">
+                  <div className="text-[11px] sm:text-sm font-semibold text-slate-600 dark:text-slate-400">Kelime hatası</div>
+                  <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-red-500 dark:text-red-400">{selectedEntry.wordErrorCount}</div>
+                  <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-slate-500">{selectedEntry.extraSpaceErrors} fazla boşluk</div>
                 </div>
-                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                  <div className="text-sm font-semibold text-slate-600 dark:text-slate-400">Atlanan kelime</div>
-                  <div className="mt-2 text-2xl font-bold text-orange-500 dark:text-orange-400">{selectedEntry.skippedWords}</div>
+                <div className="rounded-md border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 flex flex-col justify-center">
+                  <div className="text-[11px] sm:text-sm font-semibold text-slate-600 dark:text-slate-400">Atlanan kelime</div>
+                  <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-orange-500 dark:text-orange-400">{selectedEntry.skippedWords}</div>
                   {selectedEntry.isFailedBySkippedWords && (
-                    <div className="mt-1 text-xs text-red-500 font-semibold">14+ atlama: başarısız</div>
+                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-red-500 font-semibold leading-tight">14+ atlama:<br className="sm:hidden" /> başarısız</div>
                   )}
                 </div>
-                <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                  <div className="text-sm font-semibold text-slate-600 dark:text-slate-400">Tuş vuruşu</div>
-                  <div className="mt-2 text-2xl font-bold text-indigo-600 dark:text-indigo-400">{selectedEntry.totalKeystrokes}</div>
-                  <div className="mt-1 text-xs text-slate-500">{selectedEntry.keystrokesPerMinute != null ? Number(selectedEntry.keystrokesPerMinute).toFixed(1) : '-'} vuruş/dk</div>
+                <div className="rounded-md border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 flex flex-col justify-center">
+                  <div className="text-[11px] sm:text-sm font-semibold text-slate-600 dark:text-slate-400">Tuş vuruşu</div>
+                  <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400">{selectedEntry.totalKeystrokes}</div>
+                  <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-slate-500">{selectedEntry.keystrokesPerMinute != null ? Number(selectedEntry.keystrokesPerMinute).toFixed(1) : '-'} vuruş/dk</div>
                 </div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">

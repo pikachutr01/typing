@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, Info } from 'lucide-react'
 import { api } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import axios from 'axios'
@@ -67,9 +67,16 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <X size={20} />
             </button>
 
-            <h2 className="mb-6 text-2xl font-bold text-slate-800 dark:text-slate-100">
+            <h2 className="mb-4 text-2xl font-bold text-slate-800 dark:text-slate-100">
               {isLogin ? 'Giriş Yap' : 'Kayıt Ol'}
             </h2>
+
+            <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-800/40 dark:bg-blue-900/20 dark:text-blue-300">
+              <Info className="mt-0.5 shrink-0" size={18} />
+              <p className="leading-relaxed">
+                Sisteme giriş yapmak tamamen <strong>isteğe bağlıdır</strong> ve yalnızca yazdığınız metinlerin geçmiş performans kayıtlarını tutabilmeniz içindir. Giriş yapmadan da uygulamayı özgürce kullanabilirsiniz.
+              </p>
+            </div>
 
             {error && (
               <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
