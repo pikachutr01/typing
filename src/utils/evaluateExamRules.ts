@@ -199,7 +199,7 @@ export function evaluateExamRules(
     skippedWords,
     extraSpaceErrors,
     hasIncompleteLastWord,
-    isFailedBySkippedWords: skippedWords >= 14,
+    isFailedBySkippedWords: skippedWords >= 22,
   }
 }
 

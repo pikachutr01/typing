@@ -43,21 +43,21 @@ describe('evaluateExamRules', () => {
     expect(result.wordErrorCount).toBe(0)
   })
 
-  it('marks fourteen skipped words as failed', () => {
+  it('marks twenty-two skipped words as failed', () => {
     const result = evaluateExamRules(
-      'bir iki üç dört beş altı yedi sekiz dokuz on onbir oniki onüç ondört onbeş',
-      'bir onbeş',
+      'w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13 w14 w15 w16 w17 w18 w19 w20 w21 w22 w23',
+      'w1 w23',
     )
 
-    expect(result.skippedWords).toBe(13)
+    expect(result.skippedWords).toBe(21)
     expect(result.isFailedBySkippedWords).toBe(false)
 
     const failedResult = evaluateExamRules(
-      'bir iki üç dört beş altı yedi sekiz dokuz on onbir oniki onüç ondört onbeş onaltı',
-      'bir onaltı',
+      'w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13 w14 w15 w16 w17 w18 w19 w20 w21 w22 w23 w24',
+      'w1 w24',
     )
 
-    expect(failedResult.skippedWords).toBe(14)
+    expect(failedResult.skippedWords).toBe(22)
     expect(failedResult.isFailedBySkippedWords).toBe(true)
   })
 

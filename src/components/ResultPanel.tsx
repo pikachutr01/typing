@@ -19,7 +19,7 @@ export function ResultPanel({ result }: ResultPanelProps) {
     {
       label: 'Atlanan kelime',
       value: result.skippedWords,
-      detail: result.isFailedBySkippedWords ? '14+ atlama: başarısız' : undefined,
+      detail: result.isFailedBySkippedWords ? '22+ atlama: başarısız' : undefined,
     },
     {
       label: 'Tuş vuruşu',
@@ -38,7 +38,7 @@ export function ResultPanel({ result }: ResultPanelProps) {
 
       {result.isFailedBySkippedWords && (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800 shadow-sm dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
-          Toplam 14 veya daha fazla kelime atlandığı için sınav başarısız kabul edilir.
+          Toplam 22 veya daha fazla kelime atlandığı için sınav başarısız kabul edilir.
         </div>
       )}
 

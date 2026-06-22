@@ -187,7 +187,7 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
                   <div className="text-[11px] sm:text-sm font-semibold text-slate-600 dark:text-slate-400">Atlanan kelime</div>
                   <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold text-orange-500 dark:text-orange-400">{selectedEntry.skippedWords}</div>
                   {selectedEntry.isFailedBySkippedWords && (
-                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-red-500 font-semibold leading-tight">14+ atlama:<br className="sm:hidden" /> başarısız</div>
+                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-red-500 font-semibold leading-tight">22+ atlama:<br className="sm:hidden" /> başarısız</div>
                   )}
                 </div>
                 <div className="rounded-md border border-slate-200 bg-white p-3 sm:p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 flex flex-col justify-center">
