@@ -10,6 +10,7 @@
 - **Backend:** Node.js, Express (located in `server/` folder).
 - **Package Manager:** `pnpm` (Use `pnpm` commands locally for installs, e.g., `pnpm install`, `pnpm dev`).
 - **Validation:** Always run type checks (`pnpm typecheck` for both server and frontend) after editing files and before pushing to git to avoid build errors.
+- **Terminal Commands:** The default terminal is PowerShell, which often causes syntax errors for complex chained commands (like `&&`). When executing complex shell commands, use `cmd /c "command1 && command2"` or explicitly run them via Git Bash if necessary using `& "C:\Program Files\Git\bin\bash.exe" -c "..."`. This ensures wider command support and fewer escaping issues.
 
 ## Version Control (Git)
 - If the user appends `--git` to their prompt:
