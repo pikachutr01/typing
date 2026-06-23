@@ -151,12 +151,19 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
                       <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
                         <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-100">Metin Analizi</h3>
                         <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                          <DiffViewer 
-                            segments={diffText(
-                              getReachedExpectedText(selectedEntry.target_text || '', selectedEntry.input_value || ''), 
-                              selectedEntry.input_value || ''
-                            )} 
-                          />
+                          {selectedEntry.target_text ? (
+                            <DiffViewer 
+                              segments={diffText(
+                                getReachedExpectedText(selectedEntry.target_text, selectedEntry.input_value || ''), 
+                                selectedEntry.input_value || ''
+                              )} 
+                            />
+                          ) : (
+                            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg text-sm border border-amber-200 dark:border-amber-800/50">
+                              <div className="font-semibold mb-1">Metin Bulunamadı</div>
+                              Bu performans kaydına ait orijinal metin sistemden silindiği için kelime analizi (doğru/yanlış kıyaslaması) yapılamıyor.
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -170,11 +177,17 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
                         >
                           <div className="flex flex-1 flex-col gap-2">
                             <div className="flex flex-wrap gap-2 items-center">
-                              <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">
-                                {entry.category_name}
-                              </span>
+                              {entry.category_name ? (
+                                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded">
+                                  {entry.category_name}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded">
+                                  Silinmiş
+                                </span>
+                              )}
                               <span className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
-                                {entry.text_title}
+                                {entry.text_title || 'Orijinal Metin Bulunamadı'}
                               </span>
                             </div>
                             <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
