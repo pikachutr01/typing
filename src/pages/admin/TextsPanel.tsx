@@ -4,13 +4,12 @@ import { Plus, Edit2, Trash2, Loader2, Save, X } from 'lucide-react'
 
 export default function TextsPanel() {
   const [texts, setTexts] = useState<any[]>([])
-  const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   
   const [isEditing, setIsEditing] = useState(false)
   const [editId, setEditId] = useState<number | null>(null)
   
-  const [formData, setFormData] = useState({ title: '', content: '', category_id: '' })
+  const [formData, setFormData] = useState({ title: '', content: '' })
 
   useEffect(() => {
     fetchData()
@@ -18,12 +17,8 @@ export default function TextsPanel() {
 
   const fetchData = async () => {
     try {
-      const [textsRes, catsRes] = await Promise.all([
-        api.get('/admin/texts'),
-        api.get('/admin/categories')
-      ])
-      setTexts(textsRes.data)
-      setCategories(catsRes.data)
+      const res = await api.get('/admin/texts')
+      setTexts(res.data)
     } catch (error) {
       alert('Veriler yüklenemedi')
     } finally {
@@ -33,7 +28,7 @@ export default function TextsPanel() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.title || !formData.content || !formData.category_id) return alert('Tüm alanları doldurun')
+    if (!formData.title || !formData.content) return alert('Tüm alanları doldurun')
     
     try {
       if (editId) {
@@ -43,7 +38,7 @@ export default function TextsPanel() {
       }
       setIsEditing(false)
       setEditId(null)
-      setFormData({ title: '', content: '', category_id: '' })
+      setFormData({ title: '', content: '' })
       await fetchData()
     } catch (error) {
       alert('Kayıt işlemi başarısız')
@@ -51,7 +46,7 @@ export default function TextsPanel() {
   }
 
   const handleEdit = (text: any) => {
-    setFormData({ title: text.title, content: text.content, category_id: text.category_id })
+    setFormData({ title: text.title, content: text.content })
     setEditId(text.id)
     setIsEditing(true)
   }
@@ -78,15 +73,8 @@ export default function TextsPanel() {
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <div className="flex gap-4">
             <div className="flex-1 flex flex-col gap-1">
-              <label className="text-sm font-semibold text-slate-600">Başlık</label>
-              <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 outline-none focus:border-teal-500" />
-            </div>
-            <div className="flex-1 flex flex-col gap-1">
-              <label className="text-sm font-semibold text-slate-600">Kategori</label>
-              <select required value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 outline-none focus:border-teal-500">
-                <option value="">Seçiniz...</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <label className="text-sm font-semibold text-slate-600">Referans Başlık (Sadece Yönetici Görür)</label>
+              <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Örn: 2022 İcra Metni 1" className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 outline-none focus:border-teal-500" />
             </div>
           </div>
           <div className="flex flex-col gap-1 flex-1">
@@ -106,8 +94,8 @@ export default function TextsPanel() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Metinler</h2>
-        <button onClick={() => { setFormData({ title: '', content: '', category_id: '' }); setIsEditing(true) }} className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2">
+        <h2 className="text-2xl font-bold">Havuzdaki Metinler</h2>
+        <button onClick={() => { setFormData({ title: '', content: '' }); setIsEditing(true) }} className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2">
           <Plus size={18} /> Yeni Metin
         </button>
       </div>
@@ -118,7 +106,6 @@ export default function TextsPanel() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1">
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 truncate">{text.title}</h3>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full shrink-0">{text.category_name}</span>
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{text.content.substring(0, 100)}...</p>
             </div>

@@ -135,8 +135,8 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
                           <div className="mt-1 text-2xl font-bold text-teal-600 dark:text-teal-400">%{selectedEntry.accuracy}</div>
                         </div>
                         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-                          <div className="text-sm font-medium text-slate-500 dark:text-slate-400">Net Kelime / Dk</div>
-                          <div className="mt-1 text-2xl font-bold text-slate-800 dark:text-slate-100">{Math.round(selectedEntry.correct_words / (selectedEntry.elapsed_seconds / 60)) || 0}</div>
+                          <div className="text-sm font-medium text-slate-500 dark:text-slate-400">Doğru Kelime</div>
+                          <div className="mt-1 text-2xl font-bold text-slate-800 dark:text-slate-100">{selectedEntry.correct_words}</div>
                         </div>
                         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
                           <div className="text-sm font-medium text-slate-500 dark:text-slate-400">Hatalı Kelime</div>
@@ -191,11 +191,15 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
                           
                           <div className="flex items-center gap-4 sm:gap-6">
                             <div className="flex flex-col items-end">
-                              <span className="text-xl font-bold text-slate-800 dark:text-slate-100">{Math.round(entry.correct_words / (entry.elapsed_seconds / 60)) || 0}</span>
-                              <span className="text-xs font-medium text-slate-500">Kelime / Dk</span>
+                              <span className="text-xl font-bold text-teal-600 dark:text-teal-400">{entry.correct_words}</span>
+                              <span className="text-xs font-medium text-slate-500">Doğru Kelime</span>
                             </div>
                             <div className="flex flex-col items-end">
-                              <span className="text-xl font-bold text-teal-600 dark:text-teal-400">%{entry.accuracy}</span>
+                              <span className="text-xl font-bold text-rose-500 dark:text-rose-400">{entry.word_error_count}</span>
+                              <span className="text-xs font-medium text-slate-500">Hatalı Kelime</span>
+                            </div>
+                            <div className="flex flex-col items-end hidden sm:flex">
+                              <span className="text-xl font-bold text-slate-700 dark:text-slate-300">%{entry.accuracy}</span>
                               <span className="text-xs font-medium text-slate-500">Doğruluk</span>
                             </div>
                             <button 

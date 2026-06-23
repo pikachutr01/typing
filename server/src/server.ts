@@ -15,11 +15,9 @@ const PORT = process.env.PORT || 3001
 
 app.use(cors())
 app.use(express.json())
-app.use(apiLimiter)
-
-app.use('/api/auth', authRoutes)
-app.use('/api/texts', textRoutes)
-app.use('/api/history', historyRoutes)
+app.use('/api/auth', apiLimiter, authRoutes)
+app.use('/api/texts', apiLimiter, textRoutes)
+app.use('/api/history', apiLimiter, historyRoutes)
 app.use('/api/admin', adminRoutes)
 
 app.get('/health', (req, res) => {

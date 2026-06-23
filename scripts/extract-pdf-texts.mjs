@@ -6,7 +6,6 @@ const projectRoot = process.cwd()
 
 // Config for extraction
 const targetFolders = [
-  { dir: 'UygulamaliSinavMetinleri', categoryId: 1, categoryName: '2025 Zabıt Katipliği Metinleri', year: 2025 },
   { dir: 'SinavMetinleri_2022', categoryId: 3, categoryName: '2022 Zabıt Katipliği Metinleri', year: 2022 }
 ]
 const outputFile = path.join(projectRoot, 'insert_texts.sql')
@@ -48,7 +47,7 @@ async function extractPdfText(filePath, year) {
 }
 
 async function run() {
-  let sql = ""
+  let sql = "SET NAMES utf8mb4;\n\n"
   
   for (const folder of targetFolders) {
     const sourceDir = path.join(projectRoot, folder.dir)

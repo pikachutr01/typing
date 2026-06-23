@@ -14,7 +14,17 @@ export const getCategories = async (req: Request, res: Response) => {
 export const getTextsByCategory = async (req: Request, res: Response) => {
   try {
     const { categoryId } = req.params
-    const [texts]: any = await pool.query('SELECT * FROM texts WHERE category_id = ? ORDER BY id ASC', [categoryId])
+    const [texts]: any = await pool.query(`
+      SELECT 
+        texts.id, 
+        text_categories.display_title as title, 
+        texts.content, 
+        texts.created_at 
+      FROM texts 
+      JOIN text_categories ON texts.id = text_categories.text_id 
+      WHERE text_categories.category_id = ? 
+      ORDER BY text_categories.sort_order ASC, texts.id ASC
+    `, [categoryId])
     res.json(texts)
   } catch (error) {
     console.error(error)
@@ -24,7 +34,18 @@ export const getTextsByCategory = async (req: Request, res: Response) => {
 
 export const getAllTexts = async (req: Request, res: Response) => {
   try {
-    const [texts]: any = await pool.query('SELECT texts.*, categories.name as category_name FROM texts JOIN categories ON texts.category_id = categories.id ORDER BY texts.id ASC')
+    const [texts]: any = await pool.query(`
+      SELECT 
+        texts.id, 
+        text_categories.display_title as title, 
+        texts.content, 
+        texts.created_at, 
+        categories.name as category_name 
+      FROM texts 
+      JOIN text_categories ON texts.id = text_categories.text_id 
+      JOIN categories ON text_categories.category_id = categories.id 
+      ORDER BY text_categories.sort_order ASC, texts.id ASC
+    `)
     res.json(texts)
   } catch (error) {
     console.error(error)

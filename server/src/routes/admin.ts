@@ -13,7 +13,12 @@ import {
   getUsers,
   deleteUser,
   getUserHistory,
-  deleteHistory
+  deleteHistory,
+  getCategoryTexts,
+  assignTextToCategory,
+  removeTextFromCategory,
+  updateCategoryTextOrder,
+  getTextById
 } from '../controllers/adminController'
 
 const router = Router()
@@ -28,8 +33,14 @@ router.post('/categories', createCategory)
 router.put('/categories/:id', updateCategory)
 router.delete('/categories/:id', deleteCategory)
 
+router.get('/categories/:id/texts', getCategoryTexts)
+router.post('/categories/:id/texts', assignTextToCategory)
+router.put('/categories/:categoryId/texts/order', updateCategoryTextOrder)
+router.delete('/categories/:categoryId/texts/:textId', removeTextFromCategory)
+
 // Texts
 router.get('/texts', getTexts)
+router.get('/texts/:id', getTextById)
 router.post('/texts', createText)
 router.put('/texts/:id', updateText)
 router.delete('/texts/:id', deleteText)
