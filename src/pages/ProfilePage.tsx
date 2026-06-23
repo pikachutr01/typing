@@ -172,7 +172,7 @@ export default function ProfilePage() {
         ) : (
           <>
             {/* Overview Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
               <StatCard
                 icon={<TrendingUp className="text-rose-500" />}
                 title="Ort. Doğru Kelime"
@@ -234,25 +234,27 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
-                    <div className="flex flex-col items-center">
-                      <span className="text-2xl font-black text-amber-600 dark:text-amber-500">{bestTest.correct_words}</span>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-amber-700/60 dark:text-amber-400/60">Doğru</span>
-                    </div>
-                    <div className="w-px h-10 bg-amber-200 dark:bg-amber-800/50"></div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-2xl font-black text-slate-800 dark:text-slate-200">{bestTest.keystrokes_per_minute}</span>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Hız</span>
-                    </div>
-                    <div className="w-px h-10 bg-amber-200 dark:bg-amber-800/50"></div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-2xl font-black text-slate-800 dark:text-slate-200">%{bestTest.accuracy}</span>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Doğruluk</span>
+                  <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 relative z-10 w-full md:w-auto mt-4 md:mt-0">
+                    <div className="flex items-center justify-between md:justify-start gap-4 md:gap-6 w-full md:w-auto">
+                      <div className="flex flex-col items-center flex-1 md:flex-none">
+                        <span className="text-2xl font-black text-amber-600 dark:text-amber-500">{bestTest.correct_words}</span>
+                        <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-700/60 dark:text-amber-400/60">Doğru</span>
+                      </div>
+                      <div className="w-px h-10 bg-amber-200 dark:bg-amber-800/50"></div>
+                      <div className="flex flex-col items-center flex-1 md:flex-none">
+                        <span className="text-2xl font-black text-slate-800 dark:text-slate-200">{bestTest.keystrokes_per_minute}</span>
+                        <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Hız</span>
+                      </div>
+                      <div className="w-px h-10 bg-amber-200 dark:bg-amber-800/50"></div>
+                      <div className="flex flex-col items-center flex-1 md:flex-none">
+                        <span className="text-2xl font-black text-slate-800 dark:text-slate-200">%{bestTest.accuracy}</span>
+                        <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">Doğruluk</span>
+                      </div>
                     </div>
                     
                     <button
                       onClick={() => setIsDiffModalOpen(true)}
-                      className="ml-2 flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-500 font-semibold rounded-xl shadow-sm hover:shadow border border-amber-100 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-slate-700 transition-all"
+                      className="w-full md:w-auto md:ml-2 flex justify-center items-center gap-1.5 px-4 py-2.5 md:py-2 bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-500 font-semibold rounded-xl shadow-sm hover:shadow border border-amber-100 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-slate-700 transition-all"
                     >
                       Detay Gör
                       <ChevronRight size={16} />
@@ -528,13 +530,13 @@ export default function ProfilePage() {
 
 function StatCard({ icon, title, value, bgColor }: { icon: React.ReactNode, title: string, value: string, bgColor: string }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 flex items-center gap-4 transition-transform hover:-translate-y-1 duration-200">
-      <div className={`p-3 rounded-xl ${bgColor}`}>
+    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 transition-transform hover:-translate-y-1 duration-200 text-center sm:text-left">
+      <div className={`p-2.5 sm:p-3 rounded-xl ${bgColor} shrink-0`}>
         {icon}
       </div>
-      <div>
-        <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{title}</p>
-        <p className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">{value}</p>
+      <div className="min-w-0">
+        <p className="text-[11px] sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate" title={title}>{title}</p>
+        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-0.5 truncate">{value}</p>
       </div>
     </div>
   )
