@@ -131,7 +131,6 @@ export default function TextsPanel() {
         title="Metni Sil"
         message="Bu metni silmek istediğinize emin misiniz? Bu metne ait geçmiş test kayıtları kalıcı olarak silinecektir."
         confirmText="Sil"
-        type="danger"
       />
     </div>
   )

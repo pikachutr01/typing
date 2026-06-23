@@ -373,7 +373,6 @@ export default function CategoriesPanel() {
         title="Kategoriyi Sil"
         message="Bu kategoriyi silmek istediğinize emin misiniz? Kategori içindeki atamalar da silinecektir."
         confirmText="Sil"
-        type="danger"
       />
 
       <ConfirmationDialog
@@ -383,7 +382,6 @@ export default function CategoriesPanel() {
         title="Metni Çıkar"
         message="Metni bu kategoriden çıkarmak istediğinize emin misiniz?"
         confirmText="Çıkar"
-        type="danger"
       />
     </div>
   )

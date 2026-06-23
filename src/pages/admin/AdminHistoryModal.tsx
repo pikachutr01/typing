@@ -267,7 +267,6 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
         title="Performans Kaydını Sil"
         message="Bu performans kaydını kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
         confirmText="Sil"
-        type="danger"
       />
     </Transition>
   )

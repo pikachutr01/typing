@@ -96,7 +96,6 @@ export default function UsersPanel() {
         title="Kullanıcıyı Sil"
         message="Bu kullanıcıyı silmek istediğinize emin misiniz? Kullanıcının tüm geçmiş performans kayıtları da silinecektir. Bu işlem geri alınamaz."
         confirmText="Sil"
-        type="danger"
       />
     </div>
   )
