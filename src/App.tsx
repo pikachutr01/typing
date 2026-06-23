@@ -2,6 +2,7 @@ import React, { Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import TypingApp from './pages/TypingApp'
+import ProfilePage from './pages/ProfilePage'
 import { Loader2 } from 'lucide-react'
 
 // Code Splitting for Admin Pages
@@ -23,6 +24,7 @@ function App() {
     <Routes>
       {/* Main App */}
       <Route path="/" element={<TypingApp />} />
+      <Route path="/profile" element={<ProfilePage />} />
 
       {/* Admin Panel (Lazy Loaded and Protected) */}
       <Route

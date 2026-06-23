@@ -28,8 +28,11 @@ export const saveHistory = async (req: AuthRequest, res: Response) => {
       elapsed_seconds,
       expected_comparable_chars,
       actual_comparable_chars,
-      input_value
+      input_value,
+      mistyped_words
     } = req.body
+
+    const mistyped_words_json = mistyped_words ? JSON.stringify(mistyped_words) : null
 
     const [result]: any = await pool.query(
       `INSERT INTO test_history (
@@ -37,14 +40,16 @@ export const saveHistory = async (req: AuthRequest, res: Response) => {
         keystrokes_per_minute, correct_words, word_error_count, skipped_words,
         is_failed_by_skipped_words, extra_space_errors, has_incomplete_last_word,
         correct_chars, incorrect_chars, missed_chars, extra_chars,
-        elapsed_seconds, expected_comparable_chars, actual_comparable_chars, input_value
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        elapsed_seconds, expected_comparable_chars, actual_comparable_chars, input_value,
+        mistyped_words_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         userId, text_id, duration_minutes, accuracy, total_keystrokes,
         keystrokes_per_minute, correct_words, word_error_count, skipped_words,
         is_failed_by_skipped_words ? 1 : 0, extra_space_errors, has_incomplete_last_word ? 1 : 0,
         correct_chars, incorrect_chars, missed_chars, extra_chars,
-        elapsed_seconds, expected_comparable_chars, actual_comparable_chars, input_value
+        elapsed_seconds, expected_comparable_chars, actual_comparable_chars, input_value,
+        mistyped_words_json
       ]
     )
 

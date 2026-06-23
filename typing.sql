@@ -61,6 +61,7 @@ CREATE TABLE `test_history` (
   `expected_comparable_chars` int(11) NOT NULL,
   `actual_comparable_chars` int(11) NOT NULL,
   `input_value` text NOT NULL,
+  `mistyped_words_json` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

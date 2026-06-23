@@ -37,6 +37,7 @@ export type TypingResult = {
   expectedComparableChars: number
   actualComparableChars: number
   diffSegments: DiffSegment[]
+  mistypedWords: string[]
 }
 
 export type TestHistoryEntry = Omit<TypingResult, 'diffSegments'> & {

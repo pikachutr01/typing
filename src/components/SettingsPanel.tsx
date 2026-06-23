@@ -1,4 +1,4 @@
-import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus, Shield, LogOut } from 'lucide-react'
+import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus, Shield, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import type { DurationMinutes, TestStatus, TypingText } from '../types/typing'
@@ -28,6 +28,10 @@ type SettingsPanelProps = {
   remainingSeconds?: number
   onLoginClick?: () => void
   isMobile?: boolean
+  hasPrevText?: boolean
+  hasNextText?: boolean
+  onPrevText?: () => void
+  onNextText?: () => void
 }
 
 const durations: DurationMinutes[] = [1, 3, 5, 7, 10]
@@ -50,6 +54,10 @@ export function SettingsPanel({
   remainingSeconds = 0,
   onLoginClick,
   isMobile = false,
+  hasPrevText = false,
+  hasNextText = false,
+  onPrevText,
+  onNextText,
 }: SettingsPanelProps) {
   const isRunning = status === 'running'
   const { user, logout } = useAuthStore()
@@ -120,14 +128,38 @@ export function SettingsPanel({
 
               <div className="grid gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 min-w-[120px]">
                 <span>Süre</span>
-                <CustomSelect
-                  value={durationOptions.find(o => o.value === durationMinutes) || null}
-                  options={durationOptions}
-                  isDisabled={isRunning}
-                  onChange={(option) => {
-                    if (option) onDurationChange(Number(option.value) as DurationMinutes)
-                  }}
-                />
+                <div className="flex items-center gap-1">
+                  <div className="flex-1">
+                    <CustomSelect
+                      value={durationOptions.find(o => o.value === durationMinutes) || null}
+                      options={durationOptions}
+                      isDisabled={isRunning}
+                      onChange={(option) => {
+                        if (option) onDurationChange(Number(option.value) as DurationMinutes)
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md p-0.5 h-[38px]">
+                    <button
+                      type="button"
+                      disabled={isRunning || !hasPrevText}
+                      onClick={onPrevText}
+                      className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Önceki Metin"
+                    >
+                      <ChevronLeft size={16} strokeWidth={2.5} />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isRunning || !hasNextText}
+                      onClick={onNextText}
+                      className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Sonraki Metin"
+                    >
+                      <ChevronRight size={16} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                </div>
               </div>
 
             </motion.div>
@@ -259,6 +291,19 @@ export function SettingsPanel({
                     <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 px-1">
                       KULLANICI: <span className="text-slate-700 dark:text-slate-300">{user.username}</span>
                     </div>
+                    <MenuItem>
+                      {({ active }) => (
+                        <Link
+                          to="/profile"
+                          className={`${
+                            active ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'
+                          } flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm font-medium transition-colors`}
+                        >
+                          <User className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                          Profil & İstatistikler
+                        </Link>
+                      )}
+                    </MenuItem>
                     {user.username === 'admin' && (
                       <MenuItem>
                         {({ active }) => (

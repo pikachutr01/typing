@@ -5,6 +5,7 @@ export type ExamWordEvaluation = {
   extraSpaceErrors: number
   hasIncompleteLastWord: boolean
   isFailedBySkippedWords: boolean
+  mistypedWords: string[]
 }
 
 type Match = {
@@ -111,6 +112,7 @@ function evaluateGap(
       wordErrorCount: 0,
       skippedWords: expectedWords.length,
       hasIncompleteLastWord: false,
+      mistypedWords: [],
     }
   }
 
@@ -119,15 +121,19 @@ function evaluateGap(
       wordErrorCount: 0,
       skippedWords: 0,
       hasIncompleteLastWord: true,
+      mistypedWords: [],
     }
   }
 
+  const mistyped = expectedWords.slice(0, Math.min(expectedWords.length, actualWords.length));
+
   if (expectedWords.length === 1 && actualWords.length > 1) {
+    const isMatched = actualWords.join('') === expectedWords[0];
     return {
-      wordErrorCount:
-        actualWords.join('') === expectedWords[0] ? 1 : actualWords.length,
+      wordErrorCount: isMatched ? 1 : actualWords.length,
       skippedWords: 0,
       hasIncompleteLastWord: false,
+      mistypedWords: isMatched ? [] : [expectedWords[0]],
     }
   }
 
@@ -136,6 +142,7 @@ function evaluateGap(
       wordErrorCount: 1,
       skippedWords: 0,
       hasIncompleteLastWord: false,
+      mistypedWords: mistyped,
     }
   }
 
@@ -144,6 +151,7 @@ function evaluateGap(
       wordErrorCount: actualWords.length,
       skippedWords: 0,
       hasIncompleteLastWord: false,
+      mistypedWords: mistyped,
     }
   }
 
@@ -151,6 +159,7 @@ function evaluateGap(
     wordErrorCount: actualWords.length,
     skippedWords: Math.max(expectedWords.length - actualWords.length, 0),
     hasIncompleteLastWord: false,
+    mistypedWords: mistyped,
   }
 }
 
@@ -168,6 +177,7 @@ export function evaluateExamRules(
   let hasIncompleteLastWord = false
   let previousExpectedIndex = 0
   let previousActualIndex = 0
+  const mistypedWords: string[] = []
 
   const evaluateBetween = (
     nextExpectedIndex: number,
@@ -183,6 +193,7 @@ export function evaluateExamRules(
     wordErrorCount += result.wordErrorCount
     skippedWords += result.skippedWords
     hasIncompleteLastWord ||= result.hasIncompleteLastWord
+    mistypedWords.push(...(result.mistypedWords || []))
   }
 
   for (const match of matches) {
@@ -200,6 +211,7 @@ export function evaluateExamRules(
     extraSpaceErrors,
     hasIncompleteLastWord,
     isFailedBySkippedWords: skippedWords >= 22,
+    mistypedWords
   }
 }
 

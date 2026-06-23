@@ -83,5 +83,6 @@ export function calculateTypingResult(
     expectedComparableChars: expectedText.length,
     actualComparableChars: actualText.length,
     diffSegments,
+    mistypedWords: examEvaluation.mistypedWords,
   }
 }

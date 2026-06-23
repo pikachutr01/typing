@@ -111,6 +111,25 @@ function TypingApp() {
     [resetToIdle],
   )
 
+  const currentIndex = useMemo(() => {
+    return availableTexts.findIndex((t) => t.id === selectedTextId)
+  }, [availableTexts, selectedTextId])
+
+  const hasPrevText = currentIndex > 0
+  const hasNextText = currentIndex >= 0 && currentIndex < availableTexts.length - 1
+
+  const handlePrevText = useCallback(() => {
+    if (hasPrevText) {
+      handleTextChange(availableTexts[currentIndex - 1].id)
+    }
+  }, [hasPrevText, currentIndex, availableTexts, handleTextChange])
+
+  const handleNextText = useCallback(() => {
+    if (hasNextText) {
+      handleTextChange(availableTexts[currentIndex + 1].id)
+    }
+  }, [hasNextText, currentIndex, availableTexts, handleTextChange])
+
   const finishTest = useCallback(() => {
     setStatus((currentStatus) => {
       if (currentStatus !== 'running') {
@@ -277,6 +296,10 @@ function TypingApp() {
         remainingSeconds={remainingSeconds}
         onLoginClick={() => setIsAuthModalOpen(true)}
         isMobile={isMobile}
+        hasPrevText={hasPrevText}
+        hasNextText={hasNextText}
+        onPrevText={handlePrevText}
+        onNextText={handleNextText}
       />
 
       <main className="flex-1 mx-auto flex flex-col w-full max-w-[90rem] gap-4 px-4 py-4 sm:px-6 lg:px-8 min-h-0">

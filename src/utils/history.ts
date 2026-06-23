@@ -98,7 +98,8 @@ export async function saveTestHistory(
       elapsed_seconds: result.elapsedSeconds,
       expected_comparable_chars: result.expectedComparableChars,
       actual_comparable_chars: result.actualComparableChars,
-      input_value: inputValue
+      input_value: inputValue,
+      mistyped_words: result.mistypedWords,
     })
   } catch (error) {
     console.error('Failed to save history to API', error)
