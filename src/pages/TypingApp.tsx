@@ -34,9 +34,22 @@ function TypingApp() {
       const cats: string[] = Array.from(new Set(fetchedTexts.map((t: any) => t.category_name)))
       setCategories(cats)
       if (cats.length > 0) {
-        setSelectedCategory(cats[0])
-        const firstText = fetchedTexts.find((t: any) => t.category === cats[0])
-        if (firstText) setSelectedTextId(firstText.id)
+        const savedCat = localStorage.getItem('typing_selectedCategory')
+        const savedTextId = localStorage.getItem('typing_selectedTextId')
+
+        if (savedCat && cats.includes(savedCat)) {
+          setSelectedCategory(savedCat)
+          const textsInCat = fetchedTexts.filter((t: any) => t.category === savedCat)
+          if (savedTextId && textsInCat.some((t: any) => String(t.id) === savedTextId)) {
+            setSelectedTextId(savedTextId)
+          } else if (textsInCat.length > 0) {
+            setSelectedTextId(textsInCat[0].id)
+          }
+        } else {
+          setSelectedCategory(cats[0])
+          const firstText = fetchedTexts.find((t: any) => t.category === cats[0])
+          if (firstText) setSelectedTextId(firstText.id)
+        }
       }
     }).catch(err => {
       console.error(err)
@@ -88,6 +101,7 @@ function TypingApp() {
   const handleTextChange = useCallback(
     (textId: string | number) => {
       setSelectedTextId(textId)
+      localStorage.setItem('typing_selectedTextId', String(textId))
       resetToIdle(durationMinutes * 60)
     },
     [durationMinutes, resetToIdle],
@@ -96,8 +110,11 @@ function TypingApp() {
   const handleCategoryChange = useCallback(
     (category: string) => {
       setSelectedCategory(category)
+      localStorage.setItem('typing_selectedCategory', category)
       const newAvailable = allTexts.filter((t) => (t.category || 'Diğer') === category)
-      setSelectedTextId(newAvailable[0]?.id ?? allTexts[0]?.id ?? '')
+      const newTextId = newAvailable[0]?.id ?? allTexts[0]?.id ?? ''
+      setSelectedTextId(newTextId)
+      localStorage.setItem('typing_selectedTextId', String(newTextId))
       resetToIdle(totalSeconds)
     },
     [resetToIdle, totalSeconds, allTexts],
@@ -129,6 +146,13 @@ function TypingApp() {
       handleTextChange(availableTexts[currentIndex + 1].id)
     }
   }, [hasNextText, currentIndex, availableTexts, handleTextChange])
+
+  const handleRandomText = useCallback(() => {
+    if (availableTexts.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableTexts.length)
+      handleTextChange(availableTexts[randomIndex].id)
+    }
+  }, [availableTexts, handleTextChange])
 
   const finishTest = useCallback(() => {
     setStatus((currentStatus) => {
@@ -300,6 +324,7 @@ function TypingApp() {
         hasNextText={hasNextText}
         onPrevText={handlePrevText}
         onNextText={handleNextText}
+        onRandomText={handleRandomText}
       />
 
       <main className="flex-1 mx-auto flex flex-col w-full max-w-[90rem] gap-4 px-4 py-4 sm:px-6 lg:px-8 min-h-0">

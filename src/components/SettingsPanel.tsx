@@ -1,4 +1,4 @@
-import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus, Shield, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react'
+import { RotateCcw, Square, BarChart2, Clock, Settings, Plus, Minus, Shield, LogOut, ChevronLeft, ChevronRight, User, Shuffle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import type { DurationMinutes, TestStatus, TypingText } from '../types/typing'
@@ -32,6 +32,7 @@ type SettingsPanelProps = {
   hasNextText?: boolean
   onPrevText?: () => void
   onNextText?: () => void
+  onRandomText?: () => void
 }
 
 const durations: DurationMinutes[] = [1, 3, 5, 7, 10]
@@ -58,6 +59,7 @@ export function SettingsPanel({
   hasNextText = false,
   onPrevText,
   onNextText,
+  onRandomText,
 }: SettingsPanelProps) {
   const isRunning = status === 'running'
   const { user, logout } = useAuthStore()
@@ -157,6 +159,16 @@ export function SettingsPanel({
                       title="Sonraki Metin"
                     >
                       <ChevronRight size={16} strokeWidth={2.5} />
+                    </button>
+                    <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
+                    <button
+                      type="button"
+                      disabled={isRunning}
+                      onClick={onRandomText}
+                      className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Rastgele Metin Seç"
+                    >
+                      <Shuffle size={16} strokeWidth={2.5} />
                     </button>
                   </div>
                 </div>
