@@ -40,8 +40,13 @@ function TypingApp() {
         if (savedCat && cats.includes(savedCat)) {
           setSelectedCategory(savedCat)
           const textsInCat = fetchedTexts.filter((t: any) => t.category === savedCat)
-          if (savedTextId && textsInCat.some((t: any) => String(t.id) === savedTextId)) {
-            setSelectedTextId(savedTextId)
+          if (savedTextId) {
+            const match = textsInCat.find((t: any) => String(t.id) === savedTextId)
+            if (match) {
+              setSelectedTextId(match.id)
+            } else if (textsInCat.length > 0) {
+              setSelectedTextId(textsInCat[0].id)
+            }
           } else if (textsInCat.length > 0) {
             setSelectedTextId(textsInCat[0].id)
           }
