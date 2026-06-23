@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { api } from '../../lib/api'
 import { Plus, Edit2, Trash2, Loader2, Save, X, ChevronDown, ChevronRight, Link2, Unlink, Eye, ArrowUp, ArrowDown } from 'lucide-react'
+import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 
 export default function CategoriesPanel() {
   const [categories, setCategories] = useState<any[]>([])
@@ -24,6 +25,10 @@ export default function CategoriesPanel() {
   const [previewContent, setPreviewContent] = useState<string | null>(null)
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
   const [previewLoading, setPreviewLoading] = useState(false)
+
+  // Confirmation Modals
+  const [deleteCatConfirm, setDeleteCatConfirm] = useState<{isOpen: boolean, categoryId: number | null}>({isOpen: false, categoryId: null})
+  const [unlinkConfirm, setUnlinkConfirm] = useState<{isOpen: boolean, categoryId: number | null, textId: number | null}>({isOpen: false, categoryId: null, textId: null})
 
   useEffect(() => {
     fetchData()
@@ -90,13 +95,15 @@ export default function CategoriesPanel() {
     }
   }
 
-  const handleDeleteCategory = async (id: number) => {
-    if (!window.confirm('Bu kategoriyi silmek istediğinize emin misiniz?')) return
+  const handleDeleteCategory = async () => {
+    if (!deleteCatConfirm.categoryId) return
     try {
-      await api.delete(`/admin/categories/${id}`)
+      await api.delete(`/admin/categories/${deleteCatConfirm.categoryId}`)
       await fetchData()
+      setDeleteCatConfirm({isOpen: false, categoryId: null})
     } catch (error: any) {
       alert(error.response?.data?.error || 'Silinirken bir hata oluştu')
+      setDeleteCatConfirm({isOpen: false, categoryId: null})
     }
   }
 
@@ -119,13 +126,15 @@ export default function CategoriesPanel() {
     }
   }
 
-  const handleRemoveText = async (categoryId: number, textId: number) => {
-    if (!window.confirm('Metni bu kategoriden çıkarmak istediğinize emin misiniz?')) return
+  const handleRemoveText = async () => {
+    if (!unlinkConfirm.categoryId || !unlinkConfirm.textId) return
     try {
-      await api.delete(`/admin/categories/${categoryId}/texts/${textId}`)
-      await fetchCategoryTexts(categoryId)
+      await api.delete(`/admin/categories/${unlinkConfirm.categoryId}/texts/${unlinkConfirm.textId}`)
+      await fetchCategoryTexts(unlinkConfirm.categoryId)
+      setUnlinkConfirm({isOpen: false, categoryId: null, textId: null})
     } catch (error: any) {
       alert(error.response?.data?.error || 'Çıkarılırken hata oluştu')
+      setUnlinkConfirm({isOpen: false, categoryId: null, textId: null})
     }
   }
 
@@ -225,7 +234,7 @@ export default function CategoriesPanel() {
               {!editId && (
                 <div className="flex items-center gap-1">
                   <button onClick={(e) => { e.stopPropagation(); setEditId(cat.id); setEditName(cat.name) }} className="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg transition-colors"><Edit2 size={16} /></button>
-                  <button onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat.id) }} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); setDeleteCatConfirm({isOpen: true, categoryId: cat.id}) }} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"><Trash2 size={16} /></button>
                 </div>
               )}
             </div>
@@ -256,7 +265,7 @@ export default function CategoriesPanel() {
                         <button onClick={() => handlePreviewText(text.id)} className="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-md transition-colors" title="İçeriği Gör">
                           <Eye size={16} />
                         </button>
-                        <button onClick={() => handleRemoveText(cat.id, text.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-md transition-colors" title="Kategoriden Çıkar">
+                        <button onClick={() => setUnlinkConfirm({isOpen: true, categoryId: cat.id, textId: text.id})} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-md transition-colors" title="Kategoriden Çıkar">
                           <Unlink size={16} />
                         </button>
                       </div>
@@ -355,6 +364,27 @@ export default function CategoriesPanel() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Dialogs */}
+      <ConfirmationDialog
+        isOpen={deleteCatConfirm.isOpen}
+        onClose={() => setDeleteCatConfirm({isOpen: false, categoryId: null})}
+        onConfirm={handleDeleteCategory}
+        title="Kategoriyi Sil"
+        message="Bu kategoriyi silmek istediğinize emin misiniz? Kategori içindeki atamalar da silinecektir."
+        confirmText="Sil"
+        type="danger"
+      />
+
+      <ConfirmationDialog
+        isOpen={unlinkConfirm.isOpen}
+        onClose={() => setUnlinkConfirm({isOpen: false, categoryId: null, textId: null})}
+        onConfirm={handleRemoveText}
+        title="Metni Çıkar"
+        message="Metni bu kategoriden çıkarmak istediğinize emin misiniz?"
+        confirmText="Çıkar"
+        type="danger"
+      />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { api } from '../../lib/api'
 import { Trash2, Loader2, Eye, CalendarDays } from 'lucide-react'
 import AdminHistoryModal from './AdminHistoryModal'
+import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 
 export default function UsersPanel() {
   const [users, setUsers] = useState<any[]>([])
@@ -9,6 +10,7 @@ export default function UsersPanel() {
 
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
   const [selectedUsername, setSelectedUsername] = useState<string>('')
+  const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, userId: number | null}>({isOpen: false, userId: null})
 
   useEffect(() => {
     fetchUsers()
@@ -25,13 +27,15 @@ export default function UsersPanel() {
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Bu kullanıcıyı silmek istediğinize emin misiniz? Kullanıcının tüm geçmiş performans kayıtları da silinecektir.')) return
+  const handleDelete = async () => {
+    if (!deleteConfirm.userId) return
     try {
-      await api.delete(`/admin/users/${id}`)
-      await fetchUsers()
+      await api.delete(`/admin/users/${deleteConfirm.userId}`)
+      setUsers(users.filter(u => u.id !== deleteConfirm.userId))
+      setDeleteConfirm({isOpen: false, userId: null})
     } catch (error: any) {
       alert(error.response?.data?.error || 'Silinirken bir hata oluştu')
+      setDeleteConfirm({isOpen: false, userId: null})
     }
   }
 
@@ -65,7 +69,7 @@ export default function UsersPanel() {
               </button>
               {user.username !== 'admin' && (
                 <button
-                  onClick={() => handleDelete(user.id)}
+                  onClick={() => setDeleteConfirm({isOpen: true, userId: user.id})}
                   className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700"
                   title="Kullanıcıyı Sil"
                 >
@@ -84,6 +88,15 @@ export default function UsersPanel() {
         userId={selectedUserId}
         username={selectedUsername}
         onClose={() => setSelectedUserId(null)}
+      />
+      <ConfirmationDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({isOpen: false, userId: null})}
+        onConfirm={handleDelete}
+        title="Kullanıcıyı Sil"
+        message="Bu kullanıcıyı silmek istediğinize emin misiniz? Kullanıcının tüm geçmiş performans kayıtları da silinecektir. Bu işlem geri alınamaz."
+        confirmText="Sil"
+        type="danger"
       />
     </div>
   )

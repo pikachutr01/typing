@@ -5,6 +5,7 @@ import { api } from '../../lib/api'
 import { DiffViewer } from '../../components/DiffViewer'
 import { diffText } from '../../utils/diffText'
 import { getReachedExpectedText } from '../../utils/evaluateExamRules'
+import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 
 type AdminHistoryModalProps = {
   userId: number | null
@@ -19,6 +20,7 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
   const [page, setPage] = useState(0)
   
   const [selectedEntry, setSelectedEntry] = useState<any | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, historyId: number | null}>({isOpen: false, historyId: null})
 
   useEffect(() => {
     if (userId) {
@@ -48,18 +50,19 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
     }
   }
 
-  const handleDelete = async (e: React.MouseEvent, historyId: number) => {
-    e.stopPropagation()
-    if (!window.confirm('Bu performans kaydını kalıcı olarak silmek istediğinize emin misiniz?')) return
+  const handleDelete = async () => {
+    if (!deleteConfirm.historyId) return
     
     try {
-      await api.delete(`/admin/history/${historyId}`)
-      setHistory(prev => prev.filter(h => h.id !== historyId))
-      if (selectedEntry && selectedEntry.id === historyId) {
+      await api.delete(`/admin/history/${deleteConfirm.historyId}`)
+      setHistory(prev => prev.filter(h => h.id !== deleteConfirm.historyId))
+      if (selectedEntry && selectedEntry.id === deleteConfirm.historyId) {
         setSelectedEntry(null)
       }
+      setDeleteConfirm({isOpen: false, historyId: null})
     } catch (error) {
       alert('Kayıt silinemedi')
+      setDeleteConfirm({isOpen: false, historyId: null})
     }
   }
 
@@ -216,7 +219,7 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
                               <span className="text-xs font-medium text-slate-500">Doğruluk</span>
                             </div>
                             <button 
-                              onClick={(e) => handleDelete(e, entry.id)}
+                              onClick={(e) => { e.stopPropagation(); setDeleteConfirm({isOpen: true, historyId: entry.id}) }}
                               className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                               title="Kaydı Sil"
                             >
@@ -255,6 +258,17 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
           </div>
         </div>
       </Dialog>
+      
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({isOpen: false, historyId: null})}
+        onConfirm={handleDelete}
+        title="Performans Kaydını Sil"
+        message="Bu performans kaydını kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+        confirmText="Sil"
+        type="danger"
+      />
     </Transition>
   )
 }

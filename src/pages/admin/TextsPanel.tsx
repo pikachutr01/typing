@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { api } from '../../lib/api'
 import { Plus, Edit2, Trash2, Loader2, Save, X } from 'lucide-react'
+import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 
 export default function TextsPanel() {
   const [texts, setTexts] = useState<any[]>([])
@@ -10,6 +11,7 @@ export default function TextsPanel() {
   const [editId, setEditId] = useState<number | null>(null)
   
   const [formData, setFormData] = useState({ title: '', content: '' })
+  const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, textId: number | null}>({isOpen: false, textId: null})
 
   useEffect(() => {
     fetchData()
@@ -51,13 +53,15 @@ export default function TextsPanel() {
     setIsEditing(true)
   }
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Bu metni silmek istediğinize emin misiniz?')) return
+  const handleDelete = async () => {
+    if (!deleteConfirm.textId) return
     try {
-      await api.delete(`/admin/texts/${id}`)
+      await api.delete(`/admin/texts/${deleteConfirm.textId}`)
       await fetchData()
+      setDeleteConfirm({isOpen: false, textId: null})
     } catch (error: any) {
       alert(error.response?.data?.error || 'Silinirken bir hata oluştu')
+      setDeleteConfirm({isOpen: false, textId: null})
     }
   }
 
@@ -111,7 +115,7 @@ export default function TextsPanel() {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button onClick={() => handleEdit(text)} className="p-2 text-slate-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg transition-colors bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700"><Edit2 size={16} /></button>
-              <button onClick={() => handleDelete(text.id)} className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700"><Trash2 size={16} /></button>
+              <button onClick={() => setDeleteConfirm({isOpen: true, textId: text.id})} className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700"><Trash2 size={16} /></button>
             </div>
           </div>
         ))}
@@ -119,6 +123,16 @@ export default function TextsPanel() {
           <p className="text-center text-slate-500 py-8">Kayıtlı metin bulunmuyor.</p>
         )}
       </div>
+
+      <ConfirmationDialog
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({isOpen: false, textId: null})}
+        onConfirm={handleDelete}
+        title="Metni Sil"
+        message="Bu metni silmek istediğinize emin misiniz? Bu metne ait geçmiş test kayıtları kalıcı olarak silinecektir."
+        confirmText="Sil"
+        type="danger"
+      />
     </div>
   )
 }
