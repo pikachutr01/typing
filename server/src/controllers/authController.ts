@@ -1,12 +1,9 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { RowDataPacket, ResultSetHeader } from 'mysql2'
 import { pool } from '../config/db'
-import dotenv from 'dotenv'
-
-dotenv.config()
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret'
+import { JWT_SECRET } from '../config/env'
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -16,14 +13,14 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Kullanıcı adı ve şifre zorunludur.' })
     }
 
-    const [existingUsers]: any = await pool.query('SELECT * FROM users WHERE username = ?', [username])
+    const [existingUsers] = await pool.query<RowDataPacket[]>('SELECT * FROM users WHERE username = ?', [username])
     if (existingUsers.length > 0) {
       return res.status(409).json({ error: 'Bu kullanıcı adı zaten alınmış.' })
     }
 
     const passwordHash = await bcrypt.hash(password, 10)
 
-    const [result]: any = await pool.query(
+    const [result] = await pool.query<ResultSetHeader>(
       'INSERT INTO users (username, password_hash) VALUES (?, ?)',
       [username, passwordHash]
     )
@@ -45,7 +42,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Kullanıcı adı ve şifre zorunludur.' })
     }
 
-    const [users]: any = await pool.query('SELECT * FROM users WHERE username = ?', [username])
+    const [users] = await pool.query<RowDataPacket[]>('SELECT * FROM users WHERE username = ?', [username])
     if (users.length === 0) {
       return res.status(401).json({ error: 'Kullanıcı bulunamadı veya şifre hatalı.' })
     }

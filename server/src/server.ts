@@ -1,5 +1,4 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import './config/env' // .env dosyasını yükler ve JWT_SECRET kontrolünü uygulama başlamadan önce çalıştırır
 import express from 'express'
 import cors from 'cors'
 import { checkConnection } from './config/db'
@@ -13,8 +12,23 @@ import userRoutes from './routes/userRoutes'
 
 const app = express()
 const PORT = process.env.PORT || 3001
+const isProduction = process.env.NODE_ENV === 'production'
 
-app.use(cors())
+// ALLOWED_ORIGINS, virgülle ayrılmış origin listesi olarak .env dosyasından okunur
+// (örn. "https://typing.example.com,https://www.typing.example.com").
+// Production'da bu değer tanımlı değilse, varsayılan olarak hiçbir origin'e izin
+// verilmez; tüm origin'lere açık CORS (cors()) production'da güvenlik riskidir.
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map((origin) => origin.trim()).filter(Boolean)
+
+app.use(
+  cors(
+    allowedOrigins && allowedOrigins.length > 0
+      ? { origin: allowedOrigins }
+      : isProduction
+        ? { origin: false }
+        : undefined,
+  ),
+)
 app.use(express.json())
 app.use('/api/auth', apiLimiter, authRoutes)
 app.use('/api/texts', apiLimiter, textRoutes)
