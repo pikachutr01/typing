@@ -20,6 +20,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   useEffect(() => {
     if (isOpen) {
+      // Modal her açıldığında formu sıfırlıyoruz. Senkron setState çağrıları
+      // burada kasıtlıdır (form state'ini görünür olmadan önce temizlemek için);
+      // davranışı değiştirmeden bunu yeniden yapılandırmak risklidir.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLogin(true)
       setError('')
       setUsername('')

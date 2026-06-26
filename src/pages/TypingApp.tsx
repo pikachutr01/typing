@@ -19,6 +19,13 @@ function isTypingKey(key: string) {
   return key.length === 1 || key === 'Backspace' || key === 'Delete' || key === 'Enter'
 }
 
+type RawTypingText = {
+  id: string
+  title: string
+  content: string
+  category_name: string
+}
+
 function TypingApp() {
   const isMobile = useIsMobile()
   const { user } = useAuthStore()
@@ -29,9 +36,9 @@ function TypingApp() {
 
   useEffect(() => {
     api.get('/texts/all').then((res) => {
-      const fetchedTexts = res.data.map((t: any) => ({ ...t, category: t.category_name }))
+      const fetchedTexts: TypingText[] = (res.data as RawTypingText[]).map((t) => ({ ...t, category: t.category_name }))
       setAllTexts(fetchedTexts)
-      const cats: string[] = Array.from(new Set(fetchedTexts.map((t: any) => t.category_name)))
+      const cats: string[] = Array.from(new Set(fetchedTexts.map((t) => t.category ?? '')))
       setCategories(cats)
       if (cats.length > 0) {
         const savedCat = localStorage.getItem('typing_selectedCategory')
@@ -39,9 +46,9 @@ function TypingApp() {
 
         if (savedCat && cats.includes(savedCat)) {
           setSelectedCategory(savedCat)
-          const textsInCat = fetchedTexts.filter((t: any) => t.category === savedCat)
+          const textsInCat = fetchedTexts.filter((t) => t.category === savedCat)
           if (savedTextId) {
-            const match = textsInCat.find((t: any) => String(t.id) === savedTextId)
+            const match = textsInCat.find((t) => String(t.id) === savedTextId)
             if (match) {
               setSelectedTextId(match.id)
             } else if (textsInCat.length > 0) {
@@ -52,7 +59,7 @@ function TypingApp() {
           }
         } else {
           setSelectedCategory(cats[0])
-          const firstText = fetchedTexts.find((t: any) => t.category === cats[0])
+          const firstText = fetchedTexts.find((t) => t.category === cats[0])
           if (firstText) setSelectedTextId(firstText.id)
         }
       }

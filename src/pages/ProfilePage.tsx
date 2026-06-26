@@ -19,6 +19,7 @@ import {
   Area,
   AreaChart
 } from 'recharts'
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 
@@ -81,7 +82,7 @@ export default function ProfilePage() {
       .then(res => {
         setStats(res.data)
         if (res.data.overall && res.data.overall.length > 0) {
-          const maxTest = res.data.overall.reduce((max: any, obj: any) => obj.total_tests > max.total_tests ? obj : max, res.data.overall[0])
+          const maxTest = res.data.overall.reduce((max: DurationStats, obj: DurationStats) => obj.total_tests > max.total_tests ? obj : max, res.data.overall[0])
           setActiveDuration(maxTest.duration_minutes)
         }
       })
@@ -283,7 +284,7 @@ export default function ProfilePage() {
                       <YAxis tick={{fontSize: 12}} stroke="#64748b" tickFormatter={(v) => `${v}`} />
                       <Tooltip 
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: any) => [`${value} kelime`, 'Doğru Kelime']}
+                        formatter={(value: ValueType | undefined) => [`${value} kelime`, "Doğru Kelime"]}
                         labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
                       />
                       <Line type="monotone" dataKey="correctWords" stroke="#f43f5e" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
@@ -327,7 +328,7 @@ export default function ProfilePage() {
                       />
                       <Tooltip 
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: any) => [`${value} vuruş/dk`, 'Hız']}
+                        formatter={(value: ValueType | undefined) => [`${value} vuruş/dk`, "Hız"]}
                         labelStyle={{ color: '#0f172a', fontWeight: 'bold', marginBottom: '4px' }}
                       />
                       <Area 
@@ -364,7 +365,7 @@ export default function ProfilePage() {
                       <YAxis domain={[0, 100]} tick={{fontSize: 12}} stroke="#64748b" tickFormatter={(v) => `%${v}`} />
                       <Tooltip 
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: any) => [`%${value}`, 'Doğruluk']}
+                        formatter={(value: ValueType | undefined) => [`%${value}`, "Doğruluk"]}
                         labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
                       />
                       <Line type="monotone" dataKey="accuracy" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />

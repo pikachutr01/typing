@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react'
+import { useState, useEffect, useCallback, Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { X, ChevronLeft, BarChart2, CalendarDays, Clock, Trash2, Loader2, ArrowRight } from 'lucide-react'
 import { api } from '../../lib/api'
@@ -13,26 +13,30 @@ type AdminHistoryModalProps = {
   onClose: () => void
 }
 
+type AdminHistoryEntry = {
+  id: number
+  accuracy: number
+  correct_words: number
+  word_error_count: number
+  total_keystrokes: number
+  created_at: string
+  duration_minutes: number
+  text_title?: string
+  target_text?: string
+  input_value?: string
+  category_name?: string
+}
+
 export default function AdminHistoryModal({ userId, username, onClose }: AdminHistoryModalProps) {
-  const [history, setHistory] = useState<any[]>([])
+  const [history, setHistory] = useState<AdminHistoryEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
   
-  const [selectedEntry, setSelectedEntry] = useState<any | null>(null)
+  const [selectedEntry, setSelectedEntry] = useState<AdminHistoryEntry | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, historyId: number | null}>({isOpen: false, historyId: null})
 
-  useEffect(() => {
-    if (userId) {
-      setHistory([])
-      setPage(0)
-      setHasMore(true)
-      setSelectedEntry(null)
-      fetchHistory(userId, 0)
-    }
-  }, [userId])
-
-  const fetchHistory = async (uId: number, p: number) => {
+  const fetchHistory = useCallback(async (uId: number, p: number) => {
     setLoading(true)
     try {
       const res = await api.get(`/admin/users/${uId}/history?page=${p}&limit=20`)
@@ -43,12 +47,25 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
       }
       setHasMore(res.data.hasMore)
       setPage(p)
-    } catch (error) {
+    } catch {
       alert('Geçmiş yüklenemedi')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (userId) {
+      // Yeni kullanıcı seçildiğinde listeyi/sayfalamayı sıfırlamak için
+      // kasıtlı senkron setState.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHistory([])
+      setPage(0)
+      setHasMore(true)
+      setSelectedEntry(null)
+      fetchHistory(userId, 0)
+    }
+  }, [userId, fetchHistory])
 
   const handleDelete = async () => {
     if (!deleteConfirm.historyId) return
@@ -60,7 +77,7 @@ export default function AdminHistoryModal({ userId, username, onClose }: AdminHi
         setSelectedEntry(null)
       }
       setDeleteConfirm({isOpen: false, historyId: null})
-    } catch (error) {
+    } catch {
       alert('Kayıt silinemedi')
       setDeleteConfirm({isOpen: false, historyId: null})
     }

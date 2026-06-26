@@ -1,10 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { api } from '../../lib/api'
 import { Plus, Edit2, Trash2, Loader2, Save, X } from 'lucide-react'
 import { ConfirmationDialog } from '../../components/ConfirmationDialog'
+import { isAxiosError } from 'axios'
+
+type AdminText = {
+  id: number
+  title: string
+  content: string
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (isAxiosError(error) && typeof error.response?.data?.error === 'string') {
+    return error.response.data.error
+  }
+  return fallback
+}
 
 export default function TextsPanel() {
-  const [texts, setTexts] = useState<any[]>([])
+  const [texts, setTexts] = useState<AdminText[]>([])
   const [loading, setLoading] = useState(true)
   
   const [isEditing, setIsEditing] = useState(false)
@@ -13,20 +27,21 @@ export default function TextsPanel() {
   const [formData, setFormData] = useState({ title: '', content: '' })
   const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, textId: number | null}>({isOpen: false, textId: null})
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const res = await api.get('/admin/texts')
       setTexts(res.data)
-    } catch (error) {
+    } catch {
       alert('Veriler yüklenemedi')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData()
+  }, [fetchData])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,12 +57,12 @@ export default function TextsPanel() {
       setEditId(null)
       setFormData({ title: '', content: '' })
       await fetchData()
-    } catch (error) {
+    } catch {
       alert('Kayıt işlemi başarısız')
     }
   }
 
-  const handleEdit = (text: any) => {
+  const handleEdit = (text: AdminText) => {
     setFormData({ title: text.title, content: text.content })
     setEditId(text.id)
     setIsEditing(true)
@@ -59,8 +74,8 @@ export default function TextsPanel() {
       await api.delete(`/admin/texts/${deleteConfirm.textId}`)
       await fetchData()
       setDeleteConfirm({isOpen: false, textId: null})
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Silinirken bir hata oluştu')
+    } catch (error) {
+      alert(getErrorMessage(error, 'Silinirken bir hata oluştu'))
       setDeleteConfirm({isOpen: false, textId: null})
     }
   }

@@ -70,6 +70,9 @@ export function SettingsPanel({
 
   React.useEffect(() => {
     if (!isZenMode) {
+      // Zen modundan çıkıldığında "select exited" durumunu sıfırlamak için
+      // kasıtlı senkron setState.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsSelectExited(false)
     }
   }, [isZenMode])

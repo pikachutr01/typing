@@ -1,11 +1,35 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { api } from '../../lib/api'
 import { Plus, Edit2, Trash2, Loader2, Save, X, ChevronDown, ChevronRight, Link2, Unlink, Eye, ArrowUp, ArrowDown } from 'lucide-react'
 import { ConfirmationDialog } from '../../components/ConfirmationDialog'
+import { isAxiosError } from 'axios'
+
+type Category = {
+  id: number
+  name: string
+}
+
+type TextSummary = {
+  id: number
+  title: string
+}
+
+type CategoryText = {
+  id: number
+  display_title: string
+  reference_title: string
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (isAxiosError(error) && typeof error.response?.data?.error === 'string') {
+    return error.response.data.error
+  }
+  return fallback
+}
 
 export default function CategoriesPanel() {
-  const [categories, setCategories] = useState<any[]>([])
-  const [allTexts, setAllTexts] = useState<any[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [allTexts, setAllTexts] = useState<TextSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   
@@ -14,7 +38,7 @@ export default function CategoriesPanel() {
   const [newName, setNewName] = useState('')
 
   const [expandedCat, setExpandedCat] = useState<number | null>(null)
-  const [categoryTexts, setCategoryTexts] = useState<Record<number, any[]>>({})
+  const [categoryTexts, setCategoryTexts] = useState<Record<number, CategoryText[]>>({})
 
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -30,11 +54,7 @@ export default function CategoriesPanel() {
   const [deleteCatConfirm, setDeleteCatConfirm] = useState<{isOpen: boolean, categoryId: number | null}>({isOpen: false, categoryId: null})
   const [unlinkConfirm, setUnlinkConfirm] = useState<{isOpen: boolean, categoryId: number | null, textId: number | null}>({isOpen: false, categoryId: null, textId: null})
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [catsRes, textsRes] = await Promise.all([
         api.get('/admin/categories'),
@@ -42,12 +62,17 @@ export default function CategoriesPanel() {
       ])
       setCategories(catsRes.data)
       setAllTexts(textsRes.data)
-    } catch (error) {
+    } catch {
       alert('Veriler yüklenemedi')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData()
+  }, [fetchData])
 
   const fetchCategoryTexts = async (categoryId: number) => {
     try {
@@ -77,7 +102,7 @@ export default function CategoriesPanel() {
       await api.post('/admin/categories', { name: newName })
       setNewName('')
       await fetchData()
-    } catch (error) {
+    } catch {
       alert('Kategori eklenemedi')
     } finally {
       setSaving(false)
@@ -90,7 +115,7 @@ export default function CategoriesPanel() {
       await api.put(`/admin/categories/${id}`, { name: editName })
       setEditId(null)
       await fetchData()
-    } catch (error) {
+    } catch {
       alert('Kategori güncellenemedi')
     }
   }
@@ -101,8 +126,8 @@ export default function CategoriesPanel() {
       await api.delete(`/admin/categories/${deleteCatConfirm.categoryId}`)
       await fetchData()
       setDeleteCatConfirm({isOpen: false, categoryId: null})
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Silinirken bir hata oluştu')
+    } catch (error) {
+      alert(getErrorMessage(error, 'Silinirken bir hata oluştu'))
       setDeleteCatConfirm({isOpen: false, categoryId: null})
     }
   }
@@ -121,8 +146,8 @@ export default function CategoriesPanel() {
       await api.post(`/admin/categories/${targetCategoryId}/texts`, assignForm)
       setIsModalOpen(false)
       await fetchCategoryTexts(targetCategoryId)
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Metin eklenemedi')
+    } catch (error) {
+      alert(getErrorMessage(error, 'Metin eklenemedi'))
     }
   }
 
@@ -132,8 +157,8 @@ export default function CategoriesPanel() {
       await api.delete(`/admin/categories/${unlinkConfirm.categoryId}/texts/${unlinkConfirm.textId}`)
       await fetchCategoryTexts(unlinkConfirm.categoryId)
       setUnlinkConfirm({isOpen: false, categoryId: null, textId: null})
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Çıkarılırken hata oluştu')
+    } catch (error) {
+      alert(getErrorMessage(error, 'Çıkarılırken hata oluştu'))
       setUnlinkConfirm({isOpen: false, categoryId: null, textId: null})
     }
   }
@@ -144,7 +169,7 @@ export default function CategoriesPanel() {
     try {
       const res = await api.get(`/admin/texts/${textId}`)
       setPreviewContent(res.data.content)
-    } catch (error) {
+    } catch {
       alert('İçerik alınamadı')
       setIsPreviewModalOpen(false)
     } finally {
@@ -171,7 +196,7 @@ export default function CategoriesPanel() {
     try {
       const orderedTextIds = texts.map(t => t.id)
       await api.put(`/admin/categories/${categoryId}/texts/order`, { orderedTextIds })
-    } catch (error) {
+    } catch {
       alert('Sıralama güncellenemedi')
     }
   }

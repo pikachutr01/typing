@@ -28,6 +28,10 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
 
   useEffect(() => {
     if (isOpen && textId) {
+      // Veri çekme başlamadan önce loading durumunu hemen göstermek için
+      // kasıtlı senkron setState. Async .then() içindeki çağrılar zaten
+      // mikrotask kuyruğunda, sorun değil.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsDurationsLoading(true)
       getTestHistoryDurations(textId).then(durs => {
         setDurations(durs)
@@ -49,6 +53,7 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
 
   useEffect(() => {
     if (isOpen && textId && selectedDuration !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(true)
       getPaginatedTestHistory(textId, selectedDuration as DurationMinutes, LIMIT, page * LIMIT).then(items => {
         if (page === 0) {

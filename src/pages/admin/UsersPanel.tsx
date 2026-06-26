@@ -1,31 +1,46 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { api } from '../../lib/api'
 import { Trash2, Loader2, Eye, CalendarDays } from 'lucide-react'
 import AdminHistoryModal from './AdminHistoryModal'
 import { ConfirmationDialog } from '../../components/ConfirmationDialog'
+import { isAxiosError } from 'axios'
+
+type AdminUser = {
+  id: number
+  username: string
+  created_at: string
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (isAxiosError(error) && typeof error.response?.data?.error === 'string') {
+    return error.response.data.error
+  }
+  return fallback
+}
 
 export default function UsersPanel() {
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
 
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
   const [selectedUsername, setSelectedUsername] = useState<string>('')
   const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean, userId: number | null}>({isOpen: false, userId: null})
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const res = await api.get('/admin/users')
       setUsers(res.data)
-    } catch (error) {
+    } catch {
       alert('Kullanıcılar yüklenemedi')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchUsers()
+  }, [fetchUsers])
 
   const handleDelete = async () => {
     if (!deleteConfirm.userId) return
@@ -33,8 +48,8 @@ export default function UsersPanel() {
       await api.delete(`/admin/users/${deleteConfirm.userId}`)
       setUsers(users.filter(u => u.id !== deleteConfirm.userId))
       setDeleteConfirm({isOpen: false, userId: null})
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Silinirken bir hata oluştu')
+    } catch (error) {
+      alert(getErrorMessage(error, 'Silinirken bir hata oluştu'))
       setDeleteConfirm({isOpen: false, userId: null})
     }
   }

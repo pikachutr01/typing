@@ -2,6 +2,16 @@ import { api } from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import type { DurationMinutes, TestHistoryEntry, TypingResult } from '../types/typing'
 
+function parseMistypedWords(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 export async function checkTestHistory(textId: string | number): Promise<boolean> {
   const token = useAuthStore.getState().token
   if (!token) return false
@@ -28,6 +38,32 @@ export async function getTestHistoryDurations(textId: string | number): Promise<
   }
 }
 
+type RawHistoryEntry = {
+  accuracy: number
+  total_keystrokes: number
+  keystrokes_per_minute: number
+  correct_words: number
+  word_error_count: number
+  skipped_words: number
+  is_failed_by_skipped_words: 0 | 1
+  extra_space_errors: number
+  has_incomplete_last_word: 0 | 1
+  correct_chars: number
+  incorrect_chars: number
+  missed_chars: number
+  extra_chars: number
+  elapsed_seconds: number
+  expected_comparable_chars: number
+  actual_comparable_chars: number
+  created_at: string
+  text_id: string
+  text_title?: string
+  duration_minutes: DurationMinutes
+  original_text?: string
+  input_value?: string
+  mistyped_words_json?: string | null
+}
+
 export async function getPaginatedTestHistory(
   textId: string | number, 
   durationMinutes: DurationMinutes,
@@ -39,7 +75,7 @@ export async function getPaginatedTestHistory(
 
   try {
     const res = await api.get(`/history/${textId}/${durationMinutes}?limit=${limit}&offset=${offset}`)
-    return res.data.map((entry: any) => ({
+    return (res.data as RawHistoryEntry[]).map((entry) => ({
       accuracy: entry.accuracy,
       totalKeystrokes: entry.total_keystrokes,
       keystrokesPerMinute: entry.keystrokes_per_minute,
@@ -61,7 +97,8 @@ export async function getPaginatedTestHistory(
       textTitle: entry.text_title,
       durationMinutes: entry.duration_minutes,
       originalText: entry.original_text || '',
-      inputValue: entry.input_value || ''
+      inputValue: entry.input_value || '',
+      mistypedWords: parseMistypedWords(entry.mistyped_words_json),
     }))
   } catch (err) {
     console.error(err)
