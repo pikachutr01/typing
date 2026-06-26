@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
+import { RowDataPacket } from 'mysql2'
 import { pool } from '../config/db'
 
 export const getCategories = async (req: Request, res: Response) => {
   try {
-    const [categories]: any = await pool.query('SELECT * FROM categories ORDER BY id ASC')
+    const [categories] = await pool.query<RowDataPacket[]>('SELECT * FROM categories ORDER BY id ASC')
     res.json(categories)
   } catch (error) {
     console.error(error)
@@ -14,7 +15,7 @@ export const getCategories = async (req: Request, res: Response) => {
 export const getTextsByCategory = async (req: Request, res: Response) => {
   try {
     const { categoryId } = req.params
-    const [texts]: any = await pool.query(`
+    const [texts] = await pool.query<RowDataPacket[]>(`
       SELECT 
         texts.id, 
         text_categories.display_title as title, 
@@ -34,7 +35,7 @@ export const getTextsByCategory = async (req: Request, res: Response) => {
 
 export const getAllTexts = async (req: Request, res: Response) => {
   try {
-    const [texts]: any = await pool.query(`
+    const [texts] = await pool.query<RowDataPacket[]>(`
       SELECT 
         texts.id, 
         text_categories.display_title as title, 

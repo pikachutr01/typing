@@ -1,12 +1,13 @@
 import { Request, Response } from 'express'
+import { RowDataPacket, ResultSetHeader } from 'mysql2'
 import { pool } from '../config/db'
 
 // Categories
 export const getCategories = async (req: Request, res: Response) => {
   try {
-    const [categories]: any = await pool.query('SELECT * FROM categories ORDER BY id ASC')
+    const [categories] = await pool.query<RowDataPacket[]>('SELECT * FROM categories ORDER BY id ASC')
     res.json(categories)
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kategoriler alınırken hata oluştu.' })
   }
 }
@@ -14,9 +15,9 @@ export const getCategories = async (req: Request, res: Response) => {
 export const createCategory = async (req: Request, res: Response) => {
   try {
     const { name } = req.body
-    const [result]: any = await pool.query('INSERT INTO categories (name) VALUES (?)', [name])
+    const [result] = await pool.query<ResultSetHeader>('INSERT INTO categories (name) VALUES (?)', [name])
     res.json({ id: result.insertId, name })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kategori eklenirken hata oluştu.' })
   }
 }
@@ -27,7 +28,7 @@ export const updateCategory = async (req: Request, res: Response) => {
     const { name } = req.body
     await pool.query('UPDATE categories SET name = ? WHERE id = ?', [name, id])
     res.json({ id, name })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kategori güncellenirken hata oluştu.' })
   }
 }
@@ -39,7 +40,7 @@ export const deleteCategory = async (req: Request, res: Response) => {
     // It's up to the client to handle the error or we can check first.
     await pool.query('DELETE FROM categories WHERE id = ?', [id])
     res.json({ success: true })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kategori silinirken hata oluştu. Lütfen önce bu kategoriye ait metinleri silin.' })
   }
 }
@@ -47,9 +48,9 @@ export const deleteCategory = async (req: Request, res: Response) => {
 // Texts
 export const getTexts = async (req: Request, res: Response) => {
   try {
-    const [texts]: any = await pool.query('SELECT * FROM texts ORDER BY id DESC')
+    const [texts] = await pool.query<RowDataPacket[]>('SELECT * FROM texts ORDER BY id DESC')
     res.json(texts)
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Metinler alınırken hata oluştu.' })
   }
 }
@@ -57,10 +58,10 @@ export const getTexts = async (req: Request, res: Response) => {
 export const getTextById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const [texts]: any = await pool.query('SELECT * FROM texts WHERE id = ?', [id])
+    const [texts] = await pool.query<RowDataPacket[]>('SELECT * FROM texts WHERE id = ?', [id])
     if (texts.length === 0) return res.status(404).json({ error: 'Metin bulunamadı.' })
     res.json(texts[0])
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Metin alınırken hata oluştu.' })
   }
 }
@@ -68,9 +69,9 @@ export const getTextById = async (req: Request, res: Response) => {
 export const createText = async (req: Request, res: Response) => {
   try {
     const { title, content } = req.body
-    const [result]: any = await pool.query('INSERT INTO texts (title, content) VALUES (?, ?)', [title, content])
+    const [result] = await pool.query<ResultSetHeader>('INSERT INTO texts (title, content) VALUES (?, ?)', [title, content])
     res.json({ id: result.insertId, title, content })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Metin eklenirken hata oluştu.' })
   }
 }
@@ -81,7 +82,7 @@ export const updateText = async (req: Request, res: Response) => {
     const { title, content } = req.body
     await pool.query('UPDATE texts SET title = ?, content = ? WHERE id = ?', [title, content, id])
     res.json({ id, title, content })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Metin güncellenirken hata oluştu.' })
   }
 }
@@ -91,7 +92,7 @@ export const deleteText = async (req: Request, res: Response) => {
     const { id } = req.params
     await pool.query('DELETE FROM texts WHERE id = ?', [id])
     res.json({ success: true })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Metin silinirken hata oluştu. Bu metne ait geçmiş test kayıtları olabilir.' })
   }
 }
@@ -99,7 +100,7 @@ export const deleteText = async (req: Request, res: Response) => {
 export const getCategoryTexts = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const [texts]: any = await pool.query(`
+    const [texts] = await pool.query<RowDataPacket[]>(`
       SELECT t.id, t.title as reference_title, tc.display_title, t.content 
       FROM text_categories tc 
       JOIN texts t ON tc.text_id = t.id 
@@ -107,7 +108,7 @@ export const getCategoryTexts = async (req: Request, res: Response) => {
       ORDER BY tc.sort_order ASC, t.id ASC
     `, [id])
     res.json(texts)
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kategori metinleri alınırken hata.' })
   }
 }
@@ -117,13 +118,13 @@ export const assignTextToCategory = async (req: Request, res: Response) => {
     const { id } = req.params // categoryId
     const { text_id, display_title } = req.body
 
-    const [maxRow]: any = await pool.query('SELECT COALESCE(MAX(sort_order), 0) as max_sort FROM text_categories WHERE category_id = ?', [id])
+    const [maxRow] = await pool.query<RowDataPacket[]>('SELECT COALESCE(MAX(sort_order), 0) as max_sort FROM text_categories WHERE category_id = ?', [id])
     const sort_order = maxRow[0].max_sort + 1
 
     await pool.query('INSERT INTO text_categories (category_id, text_id, display_title, sort_order) VALUES (?, ?, ?, ?)', [id, text_id, display_title, sort_order])
     res.json({ success: true })
-  } catch (error: any) {
-    if (error.code === 'ER_DUP_ENTRY') {
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ error: 'Bu metin zaten bu kategoriye atanmış.' })
     }
     res.status(500).json({ error: 'Metin kategoriye atanırken hata oluştu.' })
@@ -135,7 +136,7 @@ export const removeTextFromCategory = async (req: Request, res: Response) => {
     const { categoryId, textId } = req.params
     await pool.query('DELETE FROM text_categories WHERE category_id = ? AND text_id = ?', [categoryId, textId])
     res.json({ success: true })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Metin kategoriden çıkarılırken hata oluştu.' })
   }
 }
@@ -144,12 +145,12 @@ export const updateCategoryTextOrder = async (req: Request, res: Response) => {
   try {
     const { categoryId } = req.params
     const { orderedTextIds } = req.body
-    
+
     for (let i = 0; i < orderedTextIds.length; i++) {
       await pool.query('UPDATE text_categories SET sort_order = ? WHERE category_id = ? AND text_id = ?', [i, categoryId, orderedTextIds[i]])
     }
     res.json({ success: true })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Sıralama güncellenirken hata oluştu.' })
   }
 }
@@ -157,9 +158,9 @@ export const updateCategoryTextOrder = async (req: Request, res: Response) => {
 // Users
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const [users]: any = await pool.query('SELECT id, username, created_at FROM users ORDER BY id DESC')
+    const [users] = await pool.query<RowDataPacket[]>('SELECT id, username, created_at FROM users ORDER BY id DESC')
     res.json(users)
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kullanıcılar alınırken hata oluştu.' })
   }
 }
@@ -170,7 +171,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     if (id === '1') return res.status(403).json({ error: 'Ana admin hesabı silinemez.' })
     await pool.query('DELETE FROM users WHERE id = ?', [id])
     res.json({ success: true })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kullanıcı silinirken hata oluştu.' })
   }
 }
@@ -182,7 +183,7 @@ export const getUserHistory = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 20
     const offset = page * limit
 
-    const [rows]: any = await pool.query(
+    const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT h.*, t.title as text_title, t.content as target_text, 
          (SELECT GROUP_CONCAT(c.name SEPARATOR ', ') 
           FROM text_categories tc 
@@ -196,14 +197,14 @@ export const getUserHistory = async (req: Request, res: Response) => {
     )
 
     // Count
-    const [countRows]: any = await pool.query('SELECT COUNT(*) as count FROM test_history WHERE user_id = ?', [userId])
+    const [countRows] = await pool.query<RowDataPacket[]>('SELECT COUNT(*) as count FROM test_history WHERE user_id = ?', [userId])
     const totalCount = countRows[0].count
 
     res.json({
       data: rows,
       hasMore: offset + rows.length < totalCount
     })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kullanıcı geçmişi alınırken hata oluştu.' })
   }
 }
@@ -213,7 +214,7 @@ export const deleteHistory = async (req: Request, res: Response) => {
     const { id } = req.params
     await pool.query('DELETE FROM test_history WHERE id = ?', [id])
     res.json({ success: true })
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Kayıt silinirken hata oluştu.' })
   }
 }

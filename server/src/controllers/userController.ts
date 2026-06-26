@@ -1,4 +1,5 @@
 import { Response } from 'express'
+import { RowDataPacket } from 'mysql2'
 import { AuthRequest } from '../middlewares/auth'
 import { pool } from '../config/db'
 
@@ -10,7 +11,7 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
     }
 
     // Overall stats grouped by duration
-    const [overallRows]: any = await pool.query(`
+    const [overallRows] = await pool.query<RowDataPacket[]>(`
       SELECT 
         duration_minutes,
         COUNT(*) as total_tests,
@@ -27,7 +28,7 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
     `, [userId])
 
     // Recent history (last 30 per duration)
-    const [historyRows]: any = await pool.query(`
+    const [historyRows] = await pool.query<RowDataPacket[]>(`
       SELECT * FROM (
         SELECT 
           th.id, th.duration_minutes, th.keystrokes_per_minute, th.accuracy, th.correct_words, th.created_at, t.title as text_title,
@@ -41,7 +42,7 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
     `, [userId])
 
     // Best tests per duration
-    const [bestTestRows]: any = await pool.query(`
+    const [bestTestRows] = await pool.query<RowDataPacket[]>(`
       SELECT * FROM (
         SELECT 
           th.id, th.duration_minutes, th.keystrokes_per_minute, th.accuracy, th.correct_words, th.word_error_count, th.total_keystrokes, th.input_value, th.created_at, 
@@ -55,22 +56,22 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
     `, [userId])
 
     // Mistyped words
-    const [mistypedRows]: any = await pool.query(`
+    const [mistypedRows] = await pool.query<RowDataPacket[]>(`
       SELECT mistyped_words_json
       FROM test_history
       WHERE user_id = ? AND mistyped_words_json IS NOT NULL
     `, [userId])
 
     const mistypedWordCounts: Record<string, number> = {}
-    mistypedRows.forEach((row: any) => {
+    mistypedRows.forEach((row) => {
       try {
         const words = JSON.parse(row.mistyped_words_json)
         if (Array.isArray(words)) {
-          words.forEach(word => {
+          words.forEach((word: string) => {
             mistypedWordCounts[word] = (mistypedWordCounts[word] || 0) + 1
           })
         }
-      } catch (e) {
+      } catch {
         // ignore invalid json
       }
     })
