@@ -90,6 +90,10 @@ export default function ProfilePage() {
       .finally(() => setLoading(false))
   }, [user, navigate])
 
+  useEffect(() => {
+    document.title = 'Profil & İstatistikler | Klavye Hız Testi'
+  }, [])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center">

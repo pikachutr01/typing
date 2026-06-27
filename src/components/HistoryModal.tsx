@@ -1,5 +1,6 @@
 import { CalendarDays, Clock, X, BarChart2, Eye, ChevronLeft, Loader2 } from 'lucide-react'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, Fragment } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
 import type { TestHistoryEntry, DurationMinutes } from '../types/typing'
 import { getReachedExpectedText } from '../utils/evaluateExamRules'
 import { diffText } from '../utils/diffText'
@@ -95,25 +96,38 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
     return diffText(evaluatedTargetText, selectedEntry.inputValue)
   }, [selectedEntry])
 
-  if (!isOpen) {
-    return null
-  }
-
   const handleClose = () => {
     setSelectedEntry(null)
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-        onClick={handleClose}
-      />
-      
-      {/* Main Modal */}
-      <div className="relative flex min-h-[500px] sm:min-h-[600px] max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-slate-50 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-900">
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="relative flex min-h-[500px] sm:min-h-[600px] max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-slate-50 shadow-2xl overflow-hidden text-left align-middle transition-all dark:bg-slate-900">
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950 shrink-0">
@@ -130,7 +144,7 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
                 <BarChart2 size={24} />
               </div>
             )}
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <Dialog.Title as="h2" className="text-xl font-bold flex items-center gap-2">
               {selectedEntry ? (
                 'Sınav Detayı'
               ) : textTitle ? (
@@ -140,7 +154,7 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
               ) : (
                 'Geçmiş Performanslar'
               )}
-            </h2>
+            </Dialog.Title>
           </div>
           <button
             onClick={handleClose}
@@ -308,8 +322,12 @@ export function HistoryModal({ isOpen, onClose, textId, textTitle }: HistoryModa
               )}
             </div>
           )}
+              </div>
+            </Dialog.Panel>
+            </Transition.Child>
+          </div>
         </div>
-      </div>
-    </div>
+      </Dialog>
+    </Transition>
   )
 }
